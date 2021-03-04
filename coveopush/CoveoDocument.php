@@ -240,7 +240,7 @@ class Document{
       }
       //echo json_encode($all);
       $source = json_encode($all);
-  //Debug($source);
+  Debug($source);
   $result = preg_replace('/,\s*"[^"]+":null|"[^"]+":null,?/', '', $source);
   $result = preg_replace('/,\s*"[^"]+":\[\]|"[^"]+":\[\],?/', '', $source);
   //Debug($result);

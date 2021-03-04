@@ -254,7 +254,7 @@ class Push{
         Create an Ordering Id, used to set the order of the pushed items
         """*/
         Debug('CreateOrderingId');
-        $ordering_id = microtime(true)*1000;
+        $ordering_id = round((microtime(true)*1000),0);
         Debug($ordering_id);
         return $ordering_id;
     }
@@ -453,7 +453,7 @@ class Push{
         }
         if ($params !== null) {
             $params = http_build_query($params);
-            $url .= '?' . $params;
+            $url .= '&' . $params;
         }
         $context = stream_context_create($opts);
         
@@ -711,7 +711,7 @@ class Push{
             $deleteChildren = False;
         }
 
-        $params = array( Parameters::DOCUMENT_ID => $p_DocumentId);
+        $params = array();// Parameters::DOCUMENT_ID => $p_DocumentId);
 
         if ($orderingId!=null) {
             $params[Parameters::ORDERING_ID] = $orderingId;
@@ -719,12 +719,12 @@ class Push{
         }
 
         if ($deleteChildren==True){
-            $params[Parameters::DELETE_CHILDREN] = $deleteChildren;
+            $params[Parameters::DELETE_CHILDREN] = "true";
         }
 
         Debug(json_encode($params));
 
-        $result = $this->doDelete( $this->GetDeleteDocumentUrl(), $this->GetRequestHeaders(), $params);
+        $result = $this->doDelete( $this->GetDeleteDocumentUrl().'?'.Parameters::DOCUMENT_ID.'='.$p_DocumentId, $this->GetRequestHeaders(), $params);
         if ($result!=False) {
             return true;
         }
@@ -734,17 +734,17 @@ class Push{
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    function DeleteOlderThan(int $orderingId=null, int $queueDelay=null){
+    function DeleteOlderThan(float $orderingId=null, int $queueDelay=null){
         /*"""
         DeleteOlderThan.
         All documents with a smaller orderingId will be removed from the index
-        :arg orderingId: int
+        :arg orderingId: float
         """*/
 
         Debug('DeleteOlderThan orderingId: '.$orderingId.', queueDelay: '.$queueDelay);
         // Validate
         if ($orderingId <= 0){
-            Error("DeleteOlderThan: orderingId must be a positive 64 bit integer.");
+            Error("DeleteOlderThan: orderingId must be a positive 64 bit float.");
             return;
         }
 
@@ -761,7 +761,7 @@ class Push{
         } else {
           $params[Parameters::QUEUE_DELAY] = 0;
         }
-        $result = $this->doDelete( $this->GetDeleteOlderThanUrl(), $this->GetRequestHeaders(), $params);
+        $result = $this->doDelete( $this->GetDeleteOlderThanUrl().'?', $this->GetRequestHeaders(), $params);
         if ($result!=False) {
             return true;
         }
@@ -1347,7 +1347,7 @@ class Push{
 
 
 
-        $result = $this->doDelete( $resourcePath, $this->GetRequestHeaders(),$params);
+        $result = $this->doDelete( $resourcePath.'?', $this->GetRequestHeaders(),$params);
 
         if ($result!=False) {
             return true;
