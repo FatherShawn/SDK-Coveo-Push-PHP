@@ -453,7 +453,7 @@ class Push{
         }
         if ($params !== null) {
             $params = http_build_query($params);
-            $url .= '&' . $params;
+            $url .= '?' . $params;
         }
         $context = stream_context_create($opts);
         
@@ -711,7 +711,7 @@ class Push{
             $deleteChildren = False;
         }
 
-        $params = array();// Parameters::DOCUMENT_ID => $p_DocumentId);
+        $params = array( Parameters::DOCUMENT_ID => $p_DocumentId);
 
         if ($orderingId!=null) {
             $params[Parameters::ORDERING_ID] = $orderingId;
@@ -724,7 +724,7 @@ class Push{
 
         Debug(json_encode($params));
 
-        $result = $this->doDelete( $this->GetDeleteDocumentUrl().'?'.Parameters::DOCUMENT_ID.'='.$p_DocumentId, $this->GetRequestHeaders(), $params);
+        $result = $this->doDelete( $this->GetDeleteDocumentUrl(), $this->GetRequestHeaders(), $params);
         if ($result!=False) {
             return true;
         }
@@ -761,7 +761,7 @@ class Push{
         } else {
           $params[Parameters::QUEUE_DELAY] = 0;
         }
-        $result = $this->doDelete( $this->GetDeleteOlderThanUrl().'?', $this->GetRequestHeaders(), $params);
+        $result = $this->doDelete( $this->GetDeleteOlderThanUrl(), $this->GetRequestHeaders(), $params);
         if ($result!=False) {
             return true;
         }
@@ -1347,7 +1347,7 @@ class Push{
 
 
 
-        $result = $this->doDelete( $resourcePath.'?', $this->GetRequestHeaders(),$params);
+        $result = $this->doDelete( $resourcePath, $this->GetRequestHeaders(),$params);
 
         if ($result!=False) {
             return true;
