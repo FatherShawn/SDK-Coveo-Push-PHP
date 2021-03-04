@@ -159,8 +159,8 @@ class Push{
     function cleanJSON($json){
       $source = json_encode($json);
       //Debug($source);
-      $result = preg_replace('/,\s*"[^"]+":null|"[^"]+":null,?/', '', $source);
-      $result = preg_replace('/,\s*"[^"]+":\[\]|"[^"]+":\[\],?/', '', $source);
+      $result = preg_replace('/,\s*"[^"]+": ?null|"[^"]+": ?null,?/', '', $source);
+      $result = preg_replace('/,\s*"[^"]+": ?\[\]|"[^"]+": ?\[\],?/', '', $source);
       //Debug($result);
       return $result;
     }
