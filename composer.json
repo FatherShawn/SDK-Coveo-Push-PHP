@@ -1,0 +1,17 @@
+{
+  "name": "coveo/SDKPushPHP",
+  "description": "Coveo SDK Push for PHP",
+  "license": "MIT",
+  "type": "library",
+  "description": "Coveo PHP SDK",
+  "authors": [
+      { "name": "Wim Nijmeijer", "email": "wnijmeijer@coveo.com" }
+  ],
+  "require": {
+  },
+  "autoload": {
+      "psr-4": {
+          "Coveo\\SDKPushPHP\\": ""
+      }
+  }
+}
