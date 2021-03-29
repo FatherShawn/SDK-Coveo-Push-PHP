@@ -123,7 +123,7 @@ class Push{
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Default constructor used by the deserialization.
-    function __construct(string $p_SourceId, string $p_OrganizationId, string $p_ApiKey, PushApiEndpoint $p_Endpoint=null){
+    function __construct(string $p_SourceId, string $p_OrganizationId, string $p_ApiKey, string $p_Endpoint=null){
         /*"""
         Push Constructor.
         :arg p_SourceId: Source Id to use
