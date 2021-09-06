@@ -5,9 +5,9 @@
 // Contains the CoveoDocument class
 //   A CoveoDocument will be pushed to the push source
 // -------------------------------------------------------------------------------------
-namespace Coveo\SDKPushPHP;
+namespace Coveo\Search\SDK\SDKPushPHP;
 use \DateTime;
-
+use Coveo\Search\Api\Service\LoggerInterface;
 // ---------------------------------------------------------------------------------
 
 
@@ -74,9 +74,13 @@ class Document{
     public $Author = '';
     public $Permissions = array();
     public $MetaData = array();
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    function __construct(string $p_DocumentId){
+    function __construct(string $p_DocumentId, LoggerInterface $logger){
         /*"""
         class Document constructor.
         :arg p_DocumentId: Document Id, valid URL
@@ -96,7 +100,8 @@ class Document{
         $this->ParentId = '';
         $this->ClickableUri = '';
         $this->Author = '';
-        $this->logger = 'CoveoDocument.log';
+        $this->logger = $logger;
+
     }
 
         
@@ -160,8 +165,7 @@ class Document{
           array_push($error,'DocumentId is not a valid URL format:' . $this->DocumentId);
           $result = False;
       }
-
-      Debug('Validate Document: '.implode($error,' | '));
+      $this->logger->info('[Validate Document] '.implode($error,' | '));
       return array($result, implode($error,' | '));
     }
 
@@ -184,7 +188,7 @@ class Document{
         $all = array();
         foreach ($attributes as &$attr){
           //echo $attr;
-            if (property_exists("Coveo\\SDKPushPHP\\Document", $attr)){
+            if (property_exists("Coveo\Search\\SDK\\SDKPushPHP\\Document", $attr)){
               //echo $attr;
               if (is_array ( $this->{$attr})) {
                 if (count($this->{$attr})>0) {
@@ -222,7 +226,7 @@ class Document{
       $all = array();
       foreach ($attributes as &$attr){
         //echo $attr;
-          if (property_exists("Coveo\\SDKPushPHP\\Document", $attr)){
+          if (property_exists("Coveo\Search\\SDK\\SDKPushPHP\\Document", $attr)){
             //echo $attr;
             if (is_array ( $this->{$attr})) {
               if (count($this->{$attr})>0) {
@@ -240,7 +244,7 @@ class Document{
       }
       //echo json_encode($all);
       $source = json_encode($all);
-  Debug($source);
+  //Debug($source);
   $result = preg_replace('/,\s*"[^"]+":null|"[^"]+":null,?/', '', $source);
   $result = preg_replace('/,\s*"[^"]+":\[\]|"[^"]+":\[\],?/', '', $source);
   //Debug($result);
@@ -256,10 +260,10 @@ class Document{
         :arg p_Data: str, sets the Data (Plain Text)
         """*/
 
-        Debug('SetData');
+        //Debug('SetData');
         // Check if empty
         if ($p_Data == ''){
-            Error("SetData: value not set");
+          $this->logger->error('[Setdata] : value not set');
             return;
         }
 
@@ -281,7 +285,7 @@ class Document{
 
         // Check we have a datetime object
         if (!is_a($p_Date, 'DateTime')){
-            Error("SetDate: invalid datetime object");
+          $this->logger->error("SetDate: invalid datetime object");
             return;
         }
 
@@ -302,7 +306,7 @@ class Document{
 
         // Check we have a datetime object
         if (!is_a($p_Date, 'DateTime')){
-            Error("SetModifiedDate: invalid datetime object");
+          $this->logger->error("SetModifiedDate: invalid datetime object");
             return;
         }
 
@@ -322,16 +326,16 @@ class Document{
             $this->p_CompressionType = CompressionType::ZLIB;
         }
 
-        Debug('SetCompressedEncodedData');
+        $this->logger->debug('SetCompressedEncodedData');
         // Check if empty
         if ($p_CompressedEncodedData == ''){
-            Error("SetCompressedEncodedData: value not set");
+          $this->logger->error("SetCompressedEncodedData: value not set");
             return;
         }
 
         // Check if base64 encoded
         if (!$this->isBase64($p_CompressedEncodedData)){
-            Error("SetCompressedEncodedData: value must be base64 encoded.");
+          $this->logger->error("SetCompressedEncodedData: value must be base64 encoded.");
             return;
         }
 
@@ -347,10 +351,10 @@ class Document{
         :arg p_Content: str, string
         """*/
 
-        Debug('SetContentAndZLibCompress');
+        $this->logger->debug('SetContentAndZLibCompress');
         // Check if empty
         if ($p_Content == ''){
-            Error("SetContentAndZLibCompress: value not set");
+          $this->logger->error("SetContentAndZLibCompress: value not set");
             return;
         }
 
@@ -369,17 +373,17 @@ class Document{
         Gets the file, compresses it (ZLIB), base64 encode it, set the filetype
         :arg p_FilePath: str, valid file
         """*/
-        Debug('GetFileAndCompress');
-        Debug($p_FilePath);
+        $this->logger->debug('GetFileAndCompress');
+        $this->logger->debug($p_FilePath);
         // Check if empty
         if ($p_FilePath == ''){
-            Error("GetFileAndCompress: value not set");
+          $this->logger->error("GetFileAndCompress: value not set");
             return;
         }
 
         // Check if file exists
         if (!file_exists($p_FilePath)){
-            Error("GetFileAndCompress: file does not exists ".$p_FilePath);
+          $this->logger->error("GetFileAndCompress: file does not exists ".$p_FilePath);
             return;
         }
 
@@ -400,11 +404,11 @@ class Document{
         Sets the CompressedBinaryDataFileId property.
         :arg p_CompressedDataFileId: str, the fileId retrieved by the GetLargeFileContainer call
         """*/
-        Debug('SetCompressedDataFileId');
-        Debug($p_CompressedDataFileId);
+        $this->logger->debug('SetCompressedDataFileId');
+        $this->logger->debug($p_CompressedDataFileId);
         // Check if empty
         if ($p_CompressedDataFileId == ''){
-            Error("SetCompressedDataFileId: value not set");
+          $this->logger->error("SetCompressedDataFileId: value not set");
             return;
         }
 
@@ -420,24 +424,24 @@ class Document{
         :arg p_Key: str, the key value to set
         :arg p_Value: object, the value or object to set (str or list)
         """*/
-        Debug('AddMetadata');
+        $this->logger->debug('AddMetadata');
         //Debug($p_Key . ": " . mb_convert_encoding(utf8_encode($p_Value), "UTF-8", "ASCII"));
         // Check if empty
         if ($p_Key == ''){
-            Error("AddMetadata: key not set");
+          $this->logger->error("AddMetadata: key not set");
             return;
         }
 
         // Check if in reserved keys
         $lower = strtolower($p_Key);
         if (array_key_exists($lower, Constants::s_DocumentReservedKeys)) {
-            Error("AddMetadata: " . $p_Key . " is a reserved field and cannot be set as metadata.");
+          $this->logger->error("AddMetadata: " . $p_Key . " is a reserved field and cannot be set as metadata.");
             return;
         }
 
         // Check if empty
         if ($p_Value == '' || $p_Value == null){
-            Warning("AddMetadata: value not set");
+          $this->logger->warn("AddMetadata: value not set");
             return;
         } else {
             $this->MetaData[$lower] = $p_Value;
@@ -457,10 +461,10 @@ class Document{
             $p_AllowAnonymous = False;
         }
 
-        Debug('SetAllowedAndDeniedPermissions');
+        $this->logger->debug('SetAllowedAndDeniedPermissions');
         // Check if empty
         if ($p_AllowedPermissions == null){
-            Error("SetAllowedAndDeniedPermissions: AllowedPermissions not set");
+          $this->logger->error("SetAllowedAndDeniedPermissions: AllowedPermissions not set");
             return;
         }
         

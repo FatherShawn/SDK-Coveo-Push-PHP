@@ -5,11 +5,11 @@
 // Contains the Permissions which are used inside the CoveoDocument
 //   PermissionSets, PermisionLevels and Permissions
 // -------------------------------------------------------------------------------------
-namespace Coveo\SDKPushPHP;
+namespace Coveo\Search\SDK\SDKPushPHP;
 
-use Coveo\SDKPushPHP\Enum;
-use Coveo\SDKPushPHP\CoveoConstants;
-
+use Coveo\Search\SDK\SDKPushPHP\Enum;
+use Coveo\Search\SDK\SDKPushPHP\Constants;
+use Coveo\Search\Api\Service\LoggerInterface;
 
 
 class PermissionIdentity{
@@ -134,7 +134,7 @@ class DocumentPermissionSet{
         Add a list of PermissionIdentities to the AllowedPermissions
         :arg p_PermissionIdentities: list of PermissionIdentity.
         """*/
-        Debug('AddAllowedPermissions');
+        //Debug('AddAllowedPermissions');
         // Check if correct
         if ($p_PermissionIdentities==null || empty($p_PermissionIdentities)) {
             return;
@@ -143,8 +143,8 @@ class DocumentPermissionSet{
         if (!is_array($p_PermissionIdentities)){
             $p_PermissionIdentities = array($p_PermissionIdentities);
         }
-        if (!is_a($p_PermissionIdentities[0], 'Coveo\\SDKPushPHP\\PermissionIdentity')){
-            Error( "AddAllowedPermissions: value is not of type PermissionIdentity");
+        if (!is_a($p_PermissionIdentities[0], 'Coveo\\SDK\\SDKPushPHP\\PermissionIdentity')){
+            //Error( "AddAllowedPermissions: value is not of type PermissionIdentity");
             return;
         }
 
@@ -159,7 +159,7 @@ class DocumentPermissionSet{
         Add a list of PermissionIdentities to the DeniedPermissions
         :arg p_PermissionIdentities: list of PermissionIdentity.
         """*/
-        Debug('AddDeniedPermissions');
+        //Debug('AddDeniedPermissions');
         // Check if correct
         if ($p_PermissionIdentities==null || empty($p_PermissionIdentities)) {
             return;
@@ -168,8 +168,8 @@ class DocumentPermissionSet{
         if (!is_array($p_PermissionIdentities)){
             $p_PermissionIdentities = array($p_PermissionIdentities);
         }
-        if (!is_a($p_PermissionIdentities[0], 'Coveo\\SDKPushPHP\\PermissionIdentity')){
-            Error( "AddDeniedPermissions: value is not of type PermissionIdentity");
+        if (!is_a($p_PermissionIdentities[0], 'Coveo\\SDK\\SDKPushPHP\\PermissionIdentity')){
+            //Error( "AddDeniedPermissions: value is not of type PermissionIdentity");
             return;
         }
 
@@ -205,10 +205,10 @@ class DocumentPermissionLevel{
         Add a DocumentPermissionSet to the current Level.
         :arg p_DocumentPermissionSet: DocumentPermissionSet.
         """*/
-        Debug('AddPermissionSet');
+        //Debug('AddPermissionSet');
         // Check if correct
-        if (!is_a($p_DocumentPermissionSet, 'Coveo\\SDKPushPHP\\DocumentPermissionSet')){
-            Error( "AddPermissionSet: value is not of type DocumentPermissionSet");
+        if (!is_a($p_DocumentPermissionSet, 'Coveo\\SDK\\SDKPushPHP\\DocumentPermissionSet')){
+            //Error( "AddPermissionSet: value is not of type DocumentPermissionSet");
             return;
         }
 
@@ -255,8 +255,8 @@ class PermissionIdentityBody{
         Constructor PermissionIdentityBody.
         :arg p_Identity: Identity name.
         """*/
-        if (!is_a($p_Identity, 'Coveo\\SDKPushPHP\\PermissionIdentityExpansion')){
-            Error("PermissionIdentityBody constructor: value is not of type PermissionIdentityExpansion");
+        if (!is_a($p_Identity, 'Coveo\\SDK\\SDKPushPHP\\PermissionIdentityExpansion')){
+            //Error("PermissionIdentityBody constructor: value is not of type PermissionIdentityExpansion");
             return;
         }
 
@@ -283,8 +283,8 @@ class PermissionIdentityBody{
         }
        // $type = ($p_PermissionIdentities[0] instanceof PermissionIdentityExpansion);
         //Debug(json_encode($p_PermissionIdentities));
-        if (!is_a($p_PermissionIdentities[0], 'Coveo\\SDKPushPHP\\PermissionIdentityExpansion')){
-            Error( "_add: value is not of type PermissionIdentityExpansion");
+        if (!is_a($p_PermissionIdentities[0], 'Coveo\\SDK\\SDKPushPHP\\PermissionIdentityExpansion')){
+            //Error( "_add: value is not of type PermissionIdentityExpansion");
             return;
         }
 
@@ -295,17 +295,17 @@ class PermissionIdentityBody{
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     function AddMembers( $p_PermissionIdentities){
-      Debug('AddMembers');
+      //Debug('AddMembers');
         $this->__add($this->members, $p_PermissionIdentities);
     }
 
     function AddMappings( $p_PermissionIdentities){
-      Debug('AddMappings');
+      //Debug('AddMappings');
         $this->__add($this->mappings, $p_PermissionIdentities);
     }
 
     function AddWellKnowns( $p_PermissionIdentities){
-      Debug('AddWellKnowns');
+      //Debug('AddWellKnowns');
         $this->__add($this->wellKnowns, $p_PermissionIdentities);
     }
 }
@@ -349,8 +349,8 @@ class BatchPermissions{
         if (!is_array($p_PermissionIdentityBodies)){
             $p_PermissionIdentityBodies = array($p_PermissionIdentityBodies);
         }
-        if (!is_a($p_PermissionIdentityBodies[0], 'Coveo\\SDKPushPHP\\PermissionIdentityBody')){
-            Error( "_add: value is not of type PermissionIdentityBody");
+        if (!is_a($p_PermissionIdentityBodies[0], 'Coveo\\SDK\\SDKPushPHP\\PermissionIdentityBody')){
+            //Error( "_add: value is not of type PermissionIdentityBody");
             return;
         }
 
@@ -361,17 +361,17 @@ class BatchPermissions{
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     function AddMembers( $p_PermissionIdentityBodies){
-      Debug('AddMembers Batch');
+      //Debug('AddMembers Batch');
         $this->__add($this->members, $p_PermissionIdentityBodies);
     }
 
     function AddMappings( $p_PermissionIdentityBodies){
-      Debug('AddMappings Batch');
+      //Debug('AddMappings Batch');
         $this->__add($this->mappings, $p_PermissionIdentityBodies);
     }
 
     function AddDeletes( $p_PermissionIdentityBodies){
-      Debug('AddDeletes Batch');
+      //Debug('AddDeletes Batch');
         $this->__add($this->deleted, $p_PermissionIdentityBodies);
     }
 }

@@ -5,9 +5,10 @@
 // Contains the Constants used by the SDK
 // -------------------------------------------------------------------------------------
 
-namespace Coveo\SDKPushPHP;
-require_once('Enum.php');
-use Coveo\SDKPushPHP\Enum;
+namespace Coveo\Search\SDK\SDKPushPHP;
+
+use Coveo\Search\SDK\SDKPushPHP\Enum as Enum;
+use Coveo\Search\Api\Service\LoggerInterface;
 use \Exception;
 
 //---------------------------------------------------------------------------------
@@ -144,33 +145,3 @@ class HttpHeaders{
     const AMAZON_S3_SERVER_SIDE_ENCRYPTION_VALUE = "AES256";
 }
 
-
-// ---------------------------------------------------------------------------------
-function Error($err){
-  error_log('Error: '.$err, 0);//3, $log);
-  throw new Exception($err);
-}
-// ---------------------------------------------------------------------------------
-
-
-function Warning($err){
-  error_log('Warning: '.$err, 0);//3, $log);
-  LogWindow('Warning: '.$err);
-}
-
-function Debug($err){
-  error_log('Debug: '.$err, 0);//3, $log);
-  LogWindow('Debug: '.$err);
-}
-
-// ---------------------------------------------------------------------------------
-
-function Log($err){
-  error_log('Log: '.$err, 0);//3, $log);
-  LogWindow('Log: '.$err);
-}
-
-function LogWindow($err){
-  echo "<BR>";
-  echo $err;
-}

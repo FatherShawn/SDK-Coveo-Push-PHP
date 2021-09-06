@@ -1,6 +1,6 @@
 <?php
 
-namespace Coveo\SDKPushPHP;
+namespace Coveo\Search\SDK\SDKPushPHP;
 
 /**
  * Implements the abstract base for all enum types
