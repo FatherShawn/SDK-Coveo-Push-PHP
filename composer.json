@@ -1,4 +1,7 @@
 {
+  "name": "coveo/sdkpushphp",
+  "description": "Using the push API from Coveo with PHP",
+  "type": "library",
   "repositories": [
       {
           "type": "vcs",
