@@ -8,57 +8,15 @@
 namespace Coveo\Search\SDK\SDKPushPHP;
 use \DateTime;
 use Coveo\Search\Api\Service\LoggerInterface;
-// ---------------------------------------------------------------------------------
+use Exception;
 
-
-
-
-class BatchDocument{
-    /*"""
-    class BatchDocument.
-    Class to hold the Batch Document.
-    """*/
-    public $AddOrUpdate = array();
-    public $Delete = array();
-}
-// ---------------------------------------------------------------------------------
-
-
-class DocumentToDelete{
-    /*"""
-    class DocumentToDelete.
-    Class to hold the Document To Delete.
-    It should consist of the DocumentId (URL) only."""*/
-    // The unique document identifier for the source, must be the document URI.
-    public $DocumentId = '';
-    public $Title = '';
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    function __construct(string $p_DocumentId) {
-        $this->DocumentId = $p_DocumentId;
-        $this->Title = $p_DocumentId;
-    }
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    function ToJson(){
-        /*"""ToJson, returns JSON for push.
-        Puts all metadata and other fields into clean"""*/
-        // Check if empty
-
-        $all=array();
-        $all["DocumentId"] = $this->DocumentId;
-        return json_encode($all);
-    }
-}
-
-// ---------------------------------------------------------------------------------
-
-
+ /**
+ * Class Document.
+ * Class to hold the Document To Push.
+ * Mandatory properties: DocumentId (URL) and Title.
+ */
 class Document{
-    /*"""
-    class Document.
-    Class to hold the Document To Push.
-    Mandatory properties: DocumentId (URL) and Title."""*/
+
     public $Data = '';
     public $Date = '';
     public $DocumentId = '';
@@ -80,7 +38,7 @@ class Document{
     protected $logger;
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    function __construct(string $p_DocumentId, LoggerInterface $logger){
+    function __construct(string $p_DocumentId, $logger){
         /*"""
         class Document constructor.
         :arg p_DocumentId: Document Id, valid URL
@@ -101,10 +59,8 @@ class Document{
         $this->ClickableUri = '';
         $this->Author = '';
         $this->logger = $logger;
+      }
 
-    }
-
-        
     function hashdoc($documentId){
       $hash_object = hash('sha256',utf8_encode($documentId));
       return $hash_object;
@@ -467,7 +423,7 @@ class Document{
           $this->logger->error("SetAllowedAndDeniedPermissions: AllowedPermissions not set");
             return;
         }
-        
+
 
         $simplePermissionLevel = new DocumentPermissionLevel('Level1');
 
