@@ -3,11 +3,10 @@
 // Push documents using the Start/End Batch method
 // -------------------------------------------------------------------------------------
 
-require_once('../coveopush/CoveoConstants.php');
-require_once('../coveopush/CoveoDocument.php');
-require_once('../coveopush/CoveoPermissions.php');
-require_once('../coveopush/CoveoPush.php');
-require_once('../coveopush/Enum.php');
+require_once './examples-no-composer.php';
+
+use Coveo\Search\SDK\SDKPushPHP\Push;
+use Coveo\Search\SDK\SDKPushPHP\Document;
 
 require_once('config.php');
 
@@ -16,7 +15,7 @@ function createDoc($myfile,$version){
     // Create a document
     echo "<BR>";
     echo 'Adding '.$myfile.' Version '.$version;
-    $mydoc = new Coveo\SDKPushPHP\Document('https://www.cov.com/'.$myfile.'-'.$version);
+    $mydoc = new Document('https://www.cov.com/'.$myfile.'-'.$version);
     // Get the file contents and compress it
     $mydoc->GetFileAndCompress('..'.$myfile);
     // Set Metadata
@@ -32,7 +31,7 @@ $updateSourceStatus = True;
 $deleteOlder = True;
 
 // Setup the push client
-$push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+$push = new Push($sourceId, $orgId, $apiKey);
 // Start the batch
 $push->Start($updateSourceStatus, $deleteOlder);
 // Set the maximum

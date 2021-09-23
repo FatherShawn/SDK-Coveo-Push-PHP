@@ -3,21 +3,19 @@
 // Push Single document
 // -------------------------------------------------------------------------------------
 
-require_once('../coveopush/CoveoConstants.php');
-require_once('../coveopush/CoveoDocument.php');
-require_once('../coveopush/CoveoPermissions.php');
-require_once('../coveopush/CoveoPush.php');
-require_once('../coveopush/Enum.php');
+require_once './examples-no-composer.php';
+use Coveo\Search\SDK\SDKPushPHP\Document;
+use Coveo\Search\SDK\SDKPushPHP\Push;
 
 require_once('config.php');
 // Setup the push client
-$push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+$push = new Push($sourceId, $orgId, $apiKey);
 
-//$push->UpdateSourceStatus(Coveo\SDKPushPHP\SourceStatusType::Rebuild);
+//$push->UpdateSourceStatus(SourceStatusType::Rebuild);
 
 
 // Create a document
-$mydoc = new Coveo\SDKPushPHP\Document("https://myreference.cov.com/doc2");
+$mydoc = new Document("https://myreference.cov.com/doc2");
 $mydoc->SetData("This is document Two");
 $mydoc->FileExtension = ".html";
 $mydoc->AddMetadata("authors", "jdst@coveo.com");

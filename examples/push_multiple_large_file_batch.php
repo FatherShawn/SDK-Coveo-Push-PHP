@@ -3,18 +3,15 @@
 // Push Multiple large files using the batch api
 // -------------------------------------------------------------------------------------
 
-require_once('../coveopush/CoveoConstants.php');
-require_once('../coveopush/CoveoDocument.php');
-require_once('../coveopush/CoveoPermissions.php');
-require_once('../coveopush/CoveoPush.php');
-require_once('../coveopush/Enum.php');
+require_once './examples-no-composer.php';
+use Coveo\Search\SDK\SDKPushPHP\Document;
+use Coveo\Search\SDK\SDKPushPHP\Push;
 
 require_once('config.php');
 
-
 function createDoc($myfile){
     // Create a document
-    $mydoc = new Coveo\SDKPushPHP\Document('https://www.cov.com/'.$myfile);
+    $mydoc = new Document('https://www.cov.com/'.$myfile);
     // Get the file contents and compress it
     $mydoc->GetFileAndCompress('..'.$myfile);
     // Set Metadata
@@ -30,7 +27,7 @@ $updateSourceStatus = True;
 $deleteOlder = True;
 
 // Setup the push client
-$push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+$push = new Push($sourceId, $orgId, $apiKey);
 // Create a batch of documents
 $batch=array(
     createDoc('/testfiles/BigExample.pdf'),
