@@ -3,11 +3,16 @@
 // Push single document with complicated security
 // -------------------------------------------------------------------------------------
 
-require_once('../coveopush/CoveoConstants.php');
-require_once('../coveopush/CoveoDocument.php');
-require_once('../coveopush/CoveoPermissions.php');
-require_once('../coveopush/CoveoPush.php');
-require_once('../coveopush/Enum.php');
+require_once './examples-no-composer.php';
+
+use Coveo\Search\SDK\SDKPushPHP\Push;
+use Coveo\Search\SDK\SDKPushPHP\Document;
+use Coveo\Search\SDK\SDKPushPHP\PermissionIdentityType;
+use Coveo\Search\SDK\SDKPushPHP\DocumentPermissionLevel;
+use Coveo\Search\SDK\SDKPushPHP\DocumentPermissionSet;
+use Coveo\Search\SDK\SDKPushPHP\PermissionIdentity;
+use Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion;
+
 
 function log2($text){
   echo "<BR>";
@@ -17,13 +22,13 @@ function log2($text){
 require_once('config.php');
 
 // Shortcut for constants
-$GGROUP = Coveo\SDKPushPHP\PermissionIdentityType::Group;
-$GUSER = Coveo\SDKPushPHP\PermissionIdentityType::User;
+$GGROUP = PermissionIdentityType::Group;
+$GUSER =  PermissionIdentityType::User;
 
 log2('Make sure that your API KEY has the rights to modify Security Providers !!!!');
 log2('Make sure that your Push Source has Security: Determined by source permissions set');
 // Setup the push client
-$push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+$push = new Push($sourceId, $orgId, $apiKey);
 
 // First set the securityprovidername
 $mysecprovidername = "MySecurityProviderTest";
@@ -42,7 +47,7 @@ log2("Old ids removed. Updating security cache");
 //sleep(25);
 
 // Create a document
-$mydoc = new Coveo\SDKPushPHP\Document("https://myreference.cov.com/doc22");
+$mydoc = new Document("https://myreference.cov.com/doc22");
 $mydoc->SetData("This is document Two 2");
 $mydoc->FileExtension = ".html";
 $mydoc->AddMetadata("authors", "jdst@coveo.com");
@@ -60,34 +65,34 @@ $deniedusers = array("Alex","Anne");
 $groups = array("HR","RD","SALES");
 
 // Create the permission Levels. Each level can include multiple sets.
-$permLevel1 = new Coveo\SDKPushPHP\DocumentPermissionLevel('First');
-$permLevel1Set1 = new Coveo\SDKPushPHP\DocumentPermissionSet('1Set1');
-$permLevel1Set2 = new Coveo\SDKPushPHP\DocumentPermissionSet('1Set2');
+$permLevel1 = new  DocumentPermissionLevel('First');
+$permLevel1Set1 = new DocumentPermissionSet('1Set1');
+$permLevel1Set2 = new DocumentPermissionSet('1Set2');
 $permLevel1Set1->AllowAnonymous = False;
 $permLevel1Set2->AllowAnonymous = False;
-$permLevel2 = new Coveo\SDKPushPHP\DocumentPermissionLevel('Second');
-$permLevel2Set = new Coveo\SDKPushPHP\DocumentPermissionSet('2Set1');
+$permLevel2 = new DocumentPermissionLevel('Second');
+$permLevel2Set = new DocumentPermissionSet('2Set1');
 $permLevel2Set->AllowAnonymous = False;
 
 // Set the allowed permissions for the first set of the first level
 foreach ($users as $user) {
     // Create the permission identity
     $permLevel1Set1->AddAllowedPermissions(
-    new Coveo\SDKPushPHP\PermissionIdentity($GUSER, $mysecprovidername, $user));
+    new PermissionIdentity($GUSER, $mysecprovidername, $user));
 }
 
 // Set the denied permissions for the second set of the first level
 foreach ($deniedusers as $user) {
   // Create the permission identity
   $permLevel1Set2->AddDeniedPermissions(
-  new Coveo\SDKPushPHP\PermissionIdentity($GUSER, $mysecprovidername, $user));
+  new  PermissionIdentity($GUSER, $mysecprovidername, $user));
 }
 
 // Set the allowed permissions for the first set of the second level
 foreach ($groups as $group) {
   // Create the permission identity
   $permLevel2Set->AddAllowedPermissions(
-  new Coveo\SDKPushPHP\PermissionIdentity($GGROUP, $mysecprovidername, $group));
+  new PermissionIdentity($GGROUP, $mysecprovidername, $group));
 }
 
 // Set the permission sets to the appropriate level
@@ -120,12 +125,12 @@ foreach ($groups as $group) {
     foreach ($usersingroup as $user) {
         // Create a permission Identity
         array_push($members,
-          new Coveo\SDKPushPHP\PermissionIdentityExpansion($GUSER, $mysecprovidername, $user));
+          new PermissionIdentityExpansion($GUSER, $mysecprovidername, $user));
     }
     log2($GGROUP);
     log2($group);
     $push->AddExpansionMember(
-      new Coveo\SDKPushPHP\PermissionIdentityExpansion($GGROUP, $mysecprovidername, $group), $members, array(), array());
+      new PermissionIdentityExpansion($GGROUP, $mysecprovidername, $group), $members, array(), array());
 }
 
 // mappings for all users, from userid to email address
@@ -134,13 +139,13 @@ $users = array_merge($users,$usersingroup);
 foreach ($users as $user) {
     // Create a permission Identity
     $mappings = array();
-    array_push($mappings,new Coveo\SDKPushPHP\PermissionIdentityExpansion($GUSER, "Email Security Provider", $user . "@coveo.com"));
+    array_push($mappings,new PermissionIdentityExpansion($GUSER, "Email Security Provider", $user . "@coveo.com"));
 
     $wellknowns = array();
-    array_push($wellknowns, new Coveo\SDKPushPHP\PermissionIdentityExpansion($GGROUP, $mysecprovidername, "Everyone"));
+    array_push($wellknowns, new PermissionIdentityExpansion($GGROUP, $mysecprovidername, "Everyone"));
 
     $push->AddExpansionMapping(
-      new Coveo\SDKPushPHP\PermissionIdentityExpansion($GUSER, $mysecprovidername, $user), array(), $mappings, $wellknowns);
+      new PermissionIdentityExpansion($GUSER, $mysecprovidername, $user), array(), $mappings, $wellknowns);
 }
 
 // Remove deleted users
@@ -149,7 +154,7 @@ $delusers = array("wimn","petern");
 foreach ($delusers as $user) {
   // Add each identity to delete to the Deleted
     $push->AddExpansionDeleted(
-      new Coveo\SDKPushPHP\PermissionIdentityExpansion($GUSER, $mysecprovidername, $user),array(),array(),array());
+      new PermissionIdentityExpansion($GUSER, $mysecprovidername, $user),array(),array(),array());
 }
 // End the expansion and write the last batch
 $push->EndExpansion($mysecprovidername);
@@ -171,23 +176,23 @@ $usersingroup =array("wiminsalesgroup", "peterinsalesgroup");
 $members = array();
 foreach ($usersingroup as $user) {
     // Create a permission identity
-    $mappings = array(new Coveo\SDKPushPHP\PermissionIdentityExpansion($GUSER, "Email Security Provider", $user . "@coveo.com"));
+    $mappings = array(new PermissionIdentityExpansion($GUSER, "Email Security Provider", $user . "@coveo.com"));
 
-    $wellknowns = array(new Coveo\SDKPushPHP\PermissionIdentityExpansion($GGROUP, $mysecprovidername, "Everyone"));
-    array_push($members, new Coveo\SDKPushPHP\PermissionIdentityExpansion($GUSER, $mysecprovidername, $user));
+    $wellknowns = array(new PermissionIdentityExpansion($GGROUP, $mysecprovidername, "Everyone"));
+    array_push($members, new PermissionIdentityExpansion($GUSER, $mysecprovidername, $user));
 
     $push->AddPermissionExpansion(
         $mysecprovidername,
-        new Coveo\SDKPushPHP\PermissionIdentityExpansion($GUSER, $mysecprovidername, $user),array(), $mappings, $wellknowns);
+        new PermissionIdentityExpansion($GUSER, $mysecprovidername, $user),array(), $mappings, $wellknowns);
 }
 
 $push->AddPermissionExpansion(
     $mysecprovidername,
-    new Coveo\SDKPushPHP\PermissionIdentityExpansion($GGROUP, $mysecprovidername, "Everyone"), $members, array(),array());
+    new PermissionIdentityExpansion($GGROUP, $mysecprovidername, "Everyone"), $members, array(),array());
 
 $push->AddPermissionExpansion(
     $mysecprovidername,
-    new Coveo\SDKPushPHP\PermissionIdentityExpansion($GGROUP, $mysecprovidername, "SALES"), $members, array(),array());
+    new PermissionIdentityExpansion($GGROUP, $mysecprovidername, "SALES"), $members, array(),array());
 
 
 log2( "Now updating security cache.");
@@ -199,7 +204,7 @@ log2(" each user: wim, peter, anne, wimingroup should also have mappings to Emai
 
 // Remove a Identity
 // Group SALES should be removed
-$push->RemovePermissionIdentity($mysecprovidername, new Coveo\SDKPushPHP\PermissionIdentityExpansion($GGROUP, $mysecprovidername, "SALES"));
+$push->RemovePermissionIdentity($mysecprovidername, new PermissionIdentityExpansion($GGROUP, $mysecprovidername, "SALES"));
 
 log2("Now updating security cache.");
 log2("Check:");

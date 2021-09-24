@@ -2,21 +2,22 @@
 // -------------------------------------------------------------------------------------
 // Push Single document with Data property
 // -------------------------------------------------------------------------------------
-require_once('../coveopush/CoveoConstants.php');
-require_once('../coveopush/CoveoDocument.php');
-require_once('../coveopush/CoveoPermissions.php');
-require_once('../coveopush/CoveoPush.php');
-require_once('../coveopush/Enum.php');
+
+require_once './examples-no-composer.php';
+use Coveo\Search\SDK\SDKPushPHP\Document;
+use Coveo\Search\SDK\SDKPushPHP\PermissionIdentity;
+use Coveo\Search\SDK\SDKPushPHP\PermissionIdentityType;
+use Coveo\Search\SDK\SDKPushPHP\Push;
 
 require_once('config.php');
 
 // Setup the push client
-$push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+$push = new Push($sourceId, $orgId, $apiKey);
 // Get a first Ordering Id
 $startOrderingId = $push->CreateOrderingId();
 
 // Create a document
-$mydoc = new Coveo\SDKPushPHP\Document("https://myreference.cov.com/&id=TESTME");
+$mydoc = new Document("https://myreference.cov.com/&id=TESTME");
 // Set plain text
 $mydoc->SetData("ALL OF THESE WORDS ARE SEARCHABLE");
 // Set FileExtension
@@ -33,7 +34,7 @@ $mydoc->Title = "THIS IS A TEST";
 // Set permissions
 $user_email = "wim@coveo.com";
 // Create a permission identity
-$myperm = new Coveo\SDKPushPHP\PermissionIdentity(Coveo\SDKPushPHP\PermissionIdentityType::User, "", $user_email);
+$myperm = new PermissionIdentity(PermissionIdentityType::User, "", $user_email);
 // Set the permissions on the document
 $allowAnonymous = True;
 $mydoc->SetAllowedAndDeniedPermissions(array($myperm), array(), $allowAnonymous);

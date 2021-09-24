@@ -8,6 +8,11 @@
           "url": "https://github.com/coveo-labs/SDK-Push-PHP.git"
       }
   ],
+    "autoload": {
+        "psr-4": {
+            "Coveo\\Search\\SDK\\SDKPushPHP\\": "coveopush/"
+        }
+    },
   "require": {
       "coveo/sdkpushphp": "dev-master"        
   }

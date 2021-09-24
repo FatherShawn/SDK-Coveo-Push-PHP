@@ -11,104 +11,83 @@ use Coveo\Search\SDK\SDKPushPHP\Constants;
 use Coveo\Search\SDK\SDKPushPHP\Document;
 use Coveo\Search\SDK\SDKPushPHP\Permissions;
 use Coveo\Search\Api\Service\LoggerInterface;
+use Exception;
 
+/**
+*  Class Push.
+*   Holds all methods to start pushing data.
+*   3 methods of pushing data:
+*   A) Push a single document
+*       Usage: When you simply need push a single document once in a while
+*      NOT TO BE USED: When you need to update a lot of documents. Use Method C or Method B for that.
+*      require_once('../coveopush/CoveoConstants.php');
+*      require_once('../coveopush/CoveoDocument.php');
+*      require_once('../coveopush/CoveoPermissions.php');
+*      require_once('../coveopush/CoveoPush.php');
+*      require_once('../coveopush/Enum.php')
+*
+*       $sourceId = 'xx';
+*       $orgId = 'xx';
+*       $apiKey = 'xx';
+*
+*      Setup the push client
+*      $push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+*
+*      $push->UpdateSourceStatus(Coveo\SDKPushPHP\SourceStatusType::Rebuild);
+*
+*
+*      Create a document
+*      $mydoc = new Coveo\SDKPushPHP\Document("https://myreference/doc2");
+*      $mydoc->SetData("This is document Two");
+*      $mydoc->FileExtension = ".html";
+*      $mydoc->AddMetadata("authors", "jdst@coveo.com");
+*      $mydoc->Author = "Wim";
+*      $mydoc->Title = "What's up Doc 2?";
+*      Push the document
+*      $push->AddSingleDocument($mydoc);
+*
+*    B) Push a batch of documents in a single call
+*       Usage: When you need to upload a lot of (smaller) documents
+*       NOT TO BE USED: When you need to update a lot of LARGE documents. Use Method C for that.*
+*
+*        Setup the push client
+*        $push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+*        Create a batch of documents
+*        $batch=array(
+*            createDoc('/testfiles/BigExample.pdf'),
+*            createDoc('/testfiles/BigExample2.pptx'));
+*
+*       Push the documents
+*        $push->AddDocuments($batch, array(), $updateSourceStatus, $deleteOlder);
+*
+*
+*   C) RECOMMENDED APPROACH: Push a batch of documents, document by document
+*       Usage: When you need to upload a lot of smaller/and or larger documents
+*       NOT TO BE USED: When you have a single document. Use Method A for that.
+*
+*        Setup the push client
+*        $push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+*        Start the batch
+*        $push->Start($updateSourceStatus, $deleteOlder);
+*        Set the maximum
+*        $push->SetSizeMaxRequest(150*1024*1024);
+*
+*        $push->Add(createDoc('/testfiles/Large1.pptx', '1'));
+*        $push->Add(createDoc('/testfiles/Large2.pptx', '1'));
+*        $push->Add(createDoc('/testfiles/Large1.pptx', '2'));
+*        $push->Add(createDoc('/testfiles/Large2.pptx', '2'));
+*        $push->Add(createDoc('/testfiles/Large1.pptx', '3'));
+*        $push->Add(createDoc('/testfiles/Large2.pptx', '3'));
+*        $push->Add(createDoc('/testfiles/Large1.pptx', '4'));
+*        $push->Add(createDoc('/testfiles/Large2.pptx', '4'));
+*        $push->Add(createDoc('/testfiles/Large1.pptx', '5'));
+*        $push->Add(createDoc('/testfiles/Large2.pptx', '5'));
+*
+*       # End the Push
+*        $push->End($updateSourceStatus, $deleteOlder);
+*/
+class Push {
 
-class LargeFileContainer{
-    //"""Class to store the properties returned by LargeFile Container call """
-    // The secure URI used to upload the item data into an Amazon S3 file.
-    public $UploadUri = '';
-
-    // The file identifier used to link the uploaded data to the pushed item.
-    // This value needs to be set in the item 'CompressedBinaryDataFileId' metadata.
-    public $FileId = '';
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Default constructor used by the deserialization.
-    function __construct( array $p_JSON){
-        $this->UploadUri = $p_JSON['uploadUri'];
-        $this->FileId = $p_JSON['fileId'];
-    }
-}
-
-
-class Push{
-    /*"""
-    class Push.
-    Holds all methods to start pushing data.
-
-    3 methods of pushing data:
-    A) Push a single document
-       Usage: When you simply need push a single document once in a while
-       NOT TO BE USED: When you need to update a lot of documents. Use Method C or Method B for that.
-        
-      require_once('../coveopush/CoveoConstants.php');
-      require_once('../coveopush/CoveoDocument.php');
-      require_once('../coveopush/CoveoPermissions.php');
-      require_once('../coveopush/CoveoPush.php');
-      require_once('../coveopush/Enum.php');
-
-      $sourceId = 'xx';
-      $orgId = 'xx';
-      $apiKey = 'xx';
-
-      // Setup the push client
-      $push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
-
-      //$push->UpdateSourceStatus(Coveo\SDKPushPHP\SourceStatusType::Rebuild);
-
-
-      // Create a document
-      $mydoc = new Coveo\SDKPushPHP\Document("https://myreference/doc2");
-      $mydoc->SetData("This is document Two");
-      $mydoc->FileExtension = ".html";
-      $mydoc->AddMetadata("authors", "jdst@coveo.com");
-      $mydoc->Author = "Wim";
-      $mydoc->Title = "What's up Doc 2?";
-      // Push the document
-      $push->AddSingleDocument($mydoc);
-
-    B) Push a batch of documents in a single call
-       Usage: When you need to upload a lot of (smaller) documents
-       NOT TO BE USED: When you need to update a lot of LARGE documents. Use Method C for that.
-
-       // Setup the push client
-        $push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
-        // Create a batch of documents
-        $batch=array(
-            createDoc('/testfiles/BigExample.pdf'),
-            createDoc('/testfiles/BigExample2.pptx'));
-
-        // Push the documents
-        $push->AddDocuments($batch, array(), $updateSourceStatus, $deleteOlder);
-
-
-    C) RECOMMENDED APPROACH: Push a batch of documents, document by document
-       Usage: When you need to upload a lot of smaller/and or larger documents
-       NOT TO BE USED: When you have a single document. Use Method A for that.
-
-        // Setup the push client
-        $push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
-        // Start the batch
-        $push->Start($updateSourceStatus, $deleteOlder);
-        // Set the maximum
-        $push->SetSizeMaxRequest(150*1024*1024);
-
-        $push->Add(createDoc('/testfiles/Large1.pptx', '1'));
-        $push->Add(createDoc('/testfiles/Large2.pptx', '1'));
-        $push->Add(createDoc('/testfiles/Large1.pptx', '2'));
-        $push->Add(createDoc('/testfiles/Large2.pptx', '2'));
-        $push->Add(createDoc('/testfiles/Large1.pptx', '3'));
-        $push->Add(createDoc('/testfiles/Large2.pptx', '3'));
-        $push->Add(createDoc('/testfiles/Large1.pptx', '4'));
-        $push->Add(createDoc('/testfiles/Large2.pptx', '4'));
-        $push->Add(createDoc('/testfiles/Large1.pptx', '5'));
-        $push->Add(createDoc('/testfiles/Large2.pptx', '5'));
-
-        # End the Push
-        $push->End($updateSourceStatus, $deleteOlder);
-
-
-    """*/
     public $SourceId = '';
     public $OrganizationId = '';
     public $ApiKey = '';
@@ -156,8 +135,6 @@ class Push{
         $this->logger->info('Pushing to source ' . $p_SourceId);
     }
 
-    
-
     function cleanJSON($json){
       $source = json_encode($json);
       //$this->logger->debug($source);
@@ -178,7 +155,7 @@ class Push{
         if ($p_Max > Constants::MAXIMUM_REQUEST_SIZE_IN_BYTES){
           $this->logger->debug("SetSizeMaxRequest: to big");
             return;
-            
+
         }
 
         $this->MaxRequestSize = $p_Max;
@@ -206,7 +183,7 @@ class Push{
         $content['Authorization']='Bearer ' . $this->ApiKey;
         $content['Content-Type']='application/json';
         return ($content);
-        
+
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -220,7 +197,7 @@ class Push{
         $content = array();
         $content['Content-Type']='application/octet-stream';
         $content[HttpHeaders::AMAZON_S3_SERVER_SIDE_ENCRYPTION_NAME]=HttpHeaders::AMAZON_S3_SERVER_SIDE_ENCRYPTION_VALUE;
-        
+
         return ($content);
     }
 
@@ -235,6 +212,16 @@ class Push{
         $values['prov_id'] = '';
         return $values;
     }
+
+    protected function replacePath(string $path, array $values) {
+        $newpath=$path;
+        $origin = array("{endpoint}", "{org_id}", "{src_id}","{prov_id}");
+        $to   = array($values['endpoint'],$values['org_id'],$values['src_id'],$values['prov_id']);
+
+        $newpath = str_replace($origin, $to, $newpath);
+        return $newpath;
+    }
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     function GetStatusUrl() {
         /*"""
@@ -243,8 +230,8 @@ class Push{
         """*/
         $this->logger->debug('GetStatusUrl');
         $values = $this->createPath();
-        $url = replacePath( PushApiPaths::SOURCE_ACTIVITY_STATUS, $values);
-        
+        $url = $this->replacePath( PushApiPaths::SOURCE_ACTIVITY_STATUS, $values);
+
         $this->logger->debug($url);
         return $url;
     }
@@ -269,7 +256,7 @@ class Push{
         """*/
         $this->logger->debug('GetLargeFileContainerUrl');
         $values = $this->createPath();
-        $url = replacePath( PushApiPaths::DOCUMENT_GET_CONTAINER, $values);
+        $url = $this->replacePath( PushApiPaths::DOCUMENT_GET_CONTAINER, $values);
         $this->logger->debug($url);
         return $url;
     }
@@ -282,8 +269,8 @@ class Push{
         """*/
         $this->logger->debug('GetUpdateDocumentUrl');
         $values = $this->createPath();
-        $url = replacePath( PushApiPaths::SOURCE_DOCUMENTS, $values);
-        
+        $url = $this->replacePath( PushApiPaths::SOURCE_DOCUMENTS, $values);
+
         $this->logger->debug($url);
         return $url;
     }
@@ -296,7 +283,7 @@ class Push{
         $this->logger->debug('GetSecurityProviderUrl');
         $values = $this->createPath($p_Endpoint);
         $values['prov_id'] = $p_SecurityProviderId;
-        $url = replacePath( PlatformPaths::CREATE_PROVIDER, $values);
+        $url = $this->replacePath( PlatformPaths::CREATE_PROVIDER, $values);
         $this->logger->debug($url);
         return $url;
     }
@@ -309,7 +296,7 @@ class Push{
         """*/
         $this->logger->debug('GetDeleteDocumentUrl');
         $values = $this->createPath();
-        $url = replacePath( PushApiPaths::SOURCE_DOCUMENTS, $values);
+        $url = $this->replacePath( PushApiPaths::SOURCE_DOCUMENTS, $values);
         $this->logger->debug($url);
         return $url;
     }
@@ -336,7 +323,7 @@ class Push{
         """*/
         $this->logger->debug('GetDeleteOlderThanUrl');
         $values = $this->createPath();
-        $url = replacePath( PushApiPaths::SOURCE_DOCUMENTS_DELETE, $values);
+        $url = $this->replacePath( PushApiPaths::SOURCE_DOCUMENTS_DELETE, $values);
         $this->logger->debug($url);
         return $url;
     }
@@ -348,7 +335,7 @@ class Push{
         $this->logger->debug('GetUrl');
         $values = $this->createPath();
         $values['prov_id'] = $prov_id;
-        $url = replacePath( $path, $values);
+        $url = $this->replacePath( $path, $values);
         $this->logger->debug($url);
         return $url;
     }
@@ -398,7 +385,7 @@ class Push{
             $params = http_build_query($postdata);
             //$opts['http']['content'] = $params;
             $url .= '?' . $params;
-        }        
+        }
 
         $context = stream_context_create($opts);
         $result = file_get_contents(($url), false, $context);
@@ -443,7 +430,7 @@ class Push{
     function doDelete($url, $headers, $params=null, $data=null){
       $this->logger->debug('doDelete');
       $headers = array_merge( $headers, array('Connection'=>'close'));
-        
+
         $opts = array('http' =>
             array(
                 'method'  => 'DELETE',
@@ -459,7 +446,7 @@ class Push{
             $this->logger->debug($url);
         }
         $context = stream_context_create($opts);
-        
+
         $result = file_get_contents(($url), false, $context);
         //echo 'doDelete';
         if ($result === FALSE) {
@@ -481,7 +468,7 @@ class Push{
 
         $this->logger->debug('UpdateSourceStatus, Changing status to ' . $p_SourceStatus);
         $params = array( Parameters::STATUS_TYPE => $p_SourceStatus);
-        
+
         $result = $this->doPost($this->GetStatusUrl(), $this->GetRequestHeaders(), $params);
         if ($result!=False) {
             return true;
@@ -679,7 +666,7 @@ class Push{
 
         if ($orderingId!=null) {
             $params[Parameters::ORDERING_ID] = $orderingId;
-            
+
         }
 
         $this->logger->debug(json_encode($params));
@@ -718,7 +705,7 @@ class Push{
 
         if ($orderingId!=null) {
             $params[Parameters::ORDERING_ID] = $orderingId;
-            
+
         }
 
         if ($deleteChildren==True){
@@ -772,7 +759,7 @@ class Push{
             return false;
         }
     }
-        
+
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     function AddSingleDocument(Document $p_CoveoDocument, bool $updateStatus=null, int $orderingId=null){
@@ -929,7 +916,7 @@ class Push{
                     return;
                 }
                 else {
-                 
+
                       array_push($currentBatchToAddUpdate,$document->cleanUp());//.ToJson());
                 }
             }
@@ -948,7 +935,7 @@ class Push{
         :arg p_UpdateStatus: bool (True), if the source status should be updated
         :arg p_DeleteOlder: bool (False), if older documents should be removed from the index after the new push
         """*/
-        
+
         if ($p_UpdateStatus==null) {
             $p_UpdateStatus = True;
         }
@@ -1168,7 +1155,7 @@ class Push{
 
         $values = $this->createPath();
         $values['prov_id'] = $p_SecurityProviderId;
-        $resourcePath = replacePath( $resourcePathFormat, $values);
+        $resourcePath = $this->replacePath( $resourcePathFormat, $values);
 
         $identity = $this->cleanJSON($permissionIdentityBody);
 
@@ -1280,11 +1267,11 @@ class Push{
 
         $values = $this->createPath();
         $values['prov_id'] = $p_SecurityProviderId;
-        $resourcePath = replacePath( PushApiPaths::PROVIDER_PERMISSIONS_BATCH, $values);
+        $resourcePath = $this->replacePath( PushApiPaths::PROVIDER_PERMISSIONS_BATCH, $values);
 
         $result = $this->doPut( $resourcePath, $this->GetRequestHeaders(),null,$params);
 
-        
+
 
         if ($p_DeleteOlder) {
             $this->DeletePermissionsOlderThan($p_SecurityProviderId, $this->StartOrderingId);
@@ -1297,7 +1284,7 @@ class Push{
             return false;
         }
     }
-    
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     function RemovePermissionIdentity(string $p_SecurityProviderId, PermissionIdentityExpansion $p_PermissionIdentity) {
         /*"""
@@ -1311,7 +1298,7 @@ class Push{
 
         $values = $this->createPath();
         $values['prov_id'] = $p_SecurityProviderId;
-        $resourcePath = replacePath( PushApiPaths::PROVIDER_PERMISSIONS, $values);
+        $resourcePath = $this->replacePath( PushApiPaths::PROVIDER_PERMISSIONS, $values);
         $identity = $this->cleanJSON($permissionIdentityBody);
 
         $this->logger->debug("JSON: " . $identity);
@@ -1347,10 +1334,7 @@ class Push{
 
         $values = $this->createPath();
         $values['prov_id'] = $p_SecurityProviderId;
-        $resourcePath = replacePath( PushApiPaths::PROVIDER_PERMISSIONS_DELETE, $values);
-
-
-
+        $resourcePath = $this->replacePath( PushApiPaths::PROVIDER_PERMISSIONS_DELETE, $values);
         $result = $this->doDelete( $resourcePath, $this->GetRequestHeaders(),$params);
 
         if ($result!=False) {
@@ -1359,7 +1343,5 @@ class Push{
         else {
             return false;
         }
-
-
     }
 }
