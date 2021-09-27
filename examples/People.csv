@@ -1,4 +1,4 @@
-myrownr;UserName;FirstName;MiddleName;LastName;PositionDescription;Department
+myrownr;UserName;FirstName;MiddleName;LastName;PositionDescription;Department;JobFamily
 1;156643;Tim;;Darto;AE 4, Cust Serv;Customer Service;Customer Account Executives
 2;156645;Stef;;Hines;Professional;Product Sales
 3;156647;Larry;;Landy;Exec 3, SMB Direct Sales;Product Sales

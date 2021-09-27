@@ -3,15 +3,38 @@
 namespace Coveo\Search\SDK\SDKPushPHP;
 use Psr\Log\LoggerInterface;
 
-class DefaultLogger implements LoggerInterface{
+class DefaultLogger implements LoggerInterface {
+
+  /**
+     * Whether the logger is enabled or not.
+     *
+     * @var bool
+     */
+    private static $isEnabled = true;
+
+  /**
+     * Disables the logger.
+     */
+    public static function disable()
+    {
+        self::$isEnabled = false;
+    }
+
+    /**
+     * Enables the logger.
+     */
+    public static function enable()
+    {
+        self::$isEnabled = true;
+    }
 
   function emergency($message, array $context = array()){
       error_log('emergency: '.$message, 0);
       $this->LogWindow('emergency: '.$message);
-      }
+    }
 
     function alert($message, array $context = array()){
-    error_log('alert: '.$message, 0);
+      error_log('alert: '.$message, 0);
       $this->LogWindow('alert: '.$message);
     }
 
@@ -50,9 +73,10 @@ class DefaultLogger implements LoggerInterface{
       $this->LogWindow('Log: '.$message);
      }
 
-     function LogWindow($err){
-      echo "<BR>";
-      echo $err;
+     function LogWindow( $err){
+      if (self::$isEnabled) {
+        echo "</BR>";
+        echo $err;
+      }
     }
-
 }

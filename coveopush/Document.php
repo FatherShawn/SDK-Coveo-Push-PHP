@@ -7,7 +7,7 @@
 // -------------------------------------------------------------------------------------
 namespace Coveo\Search\SDK\SDKPushPHP;
 use \DateTime;
-use Coveo\Search\Api\Service\LoggerInterface;
+use Coveo\Search\SDK\SDKPushPHP\DefaultLogger;
 use Exception;
 
  /**
@@ -33,12 +33,12 @@ class Document{
     public $Permissions = array();
     public $MetaData = array();
     /**
-     * @var LoggerInterface
+     * @var \Psr\Log\LoggerInterface
      */
     protected $logger;
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    function __construct(string $p_DocumentId, $logger){
+    function __construct(string $p_DocumentId, $logger = NULL){
         /*"""
         class Document constructor.
         :arg p_DocumentId: Document Id, valid URL
@@ -58,7 +58,9 @@ class Document{
         $this->ParentId = '';
         $this->ClickableUri = '';
         $this->Author = '';
-        $this->logger = $logger;
+        if($logger === NULL) {
+          $this->logger = new DefaultLogger();
+        }
       }
 
     function hashdoc($documentId){
@@ -397,7 +399,7 @@ class Document{
 
         // Check if empty
         if ($p_Value == '' || $p_Value == null){
-          $this->logger->warn("AddMetadata: value not set");
+          $this->logger->warning("AddMetadata: value not set");
             return;
         } else {
             $this->MetaData[$lower] = $p_Value;
