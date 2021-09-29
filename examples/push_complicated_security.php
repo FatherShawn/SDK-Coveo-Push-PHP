@@ -5,6 +5,7 @@
 
 require_once './examples-no-composer.php';
 
+use Coveo\Search\SDK\SDKPushPHP\DefaultLogger;
 use Coveo\Search\SDK\SDKPushPHP\Push;
 use Coveo\Search\SDK\SDKPushPHP\Document;
 use Coveo\Search\SDK\SDKPushPHP\PermissionIdentityType;
@@ -13,22 +14,17 @@ use Coveo\Search\SDK\SDKPushPHP\DocumentPermissionSet;
 use Coveo\Search\SDK\SDKPushPHP\PermissionIdentity;
 use Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion;
 
-
-function log2($text){
-  echo "<BR>";
-  echo $text;
-}
-
+$logger = new DefaultLogger();
 require_once('config.php');
 
 // Shortcut for constants
 $GGROUP = PermissionIdentityType::Group;
 $GUSER =  PermissionIdentityType::User;
 
-log2('Make sure that your API KEY has the rights to modify Security Providers !!!!');
-log2('Make sure that your Push Source has Security: Determined by source permissions set');
+$logger->LogWindow('Make sure that your API KEY has the rights to modify Security Providers !!!!');
+$logger->LogWindow('Make sure that your Push Source has Security: Determined by source permissions set');
 // Setup the push client
-$push = new Push($sourceId, $orgId, $apiKey);
+$push = new Push($sourceId, $orgId, $apiKey, NULL, $logger);
 
 // First set the securityprovidername
 $mysecprovidername = "MySecurityProviderTest";
@@ -43,7 +39,7 @@ $push->AddSecurityProvider($mysecprovidername, "EXPANDED", $cascading);
 $startOrderingId = $push->CreateOrderingId();
 // Delete all old entries
 $push->DeletePermissionsOlderThan($mysecprovidername, $startOrderingId);
-log2("Old ids removed. Updating security cache");
+$logger->LogWindow("Old ids removed. Updating security cache");
 //sleep(25);
 
 // Create a document
@@ -127,8 +123,8 @@ foreach ($groups as $group) {
         array_push($members,
           new PermissionIdentityExpansion($GUSER, $mysecprovidername, $user));
     }
-    log2($GGROUP);
-    log2($group);
+    $logger->LogWindow($GGROUP);
+    $logger->LogWindow($group);
     $push->AddExpansionMember(
       new PermissionIdentityExpansion($GGROUP, $mysecprovidername, $group), $members, array(), array());
 }
@@ -159,16 +155,16 @@ foreach ($delusers as $user) {
 // End the expansion and write the last batch
 $push->EndExpansion($mysecprovidername);
 
-log2("Now updating security cache.");
-log2("Check:");
-log2(" HR/RD groups: members wimingroup, peteringroup");
-log2(" SALES: should not have any members");
-log2(" each user: wim, peter, anne, wimingroup should have also mappings to Email security providers");
+$logger->LogWindow("Now updating security cache.");
+$logger->LogWindow("Check:");
+$logger->LogWindow(" HR/RD groups: members wimingroup, peteringroup");
+$logger->LogWindow(" SALES: should not have any members");
+$logger->LogWindow(" each user: wim, peter, anne, wimingroup should have also mappings to Email security providers");
 
 
 //sleep(5000);
 
-log2("Changing security");
+$logger->LogWindow("Changing security");
 
 // Add a single call, add the Sales group
 $usersingroup =array("wiminsalesgroup", "peterinsalesgroup");
@@ -195,20 +191,20 @@ $push->AddPermissionExpansion(
     new PermissionIdentityExpansion($GGROUP, $mysecprovidername, "SALES"), $members, array(),array());
 
 
-log2( "Now updating security cache.");
-log2("Check:");
-log2(" HR/RD groups: members wimingroup, peteringroup");
-log2(" SALES: should have members wiminsalesgroup, peterinsalesgroup");
-log2(" each user: wim, peter, anne, wimingroup should also have mappings to Email security providers");
+$logger->LogWindow( "Now updating security cache.");
+$logger->LogWindow("Check:");
+$logger->LogWindow(" HR/RD groups: members wimingroup, peteringroup");
+$logger->LogWindow(" SALES: should have members wiminsalesgroup, peterinsalesgroup");
+$logger->LogWindow(" each user: wim, peter, anne, wimingroup should also have mappings to Email security providers");
 //sleep(5000);
 
 // Remove a Identity
 // Group SALES should be removed
 $push->RemovePermissionIdentity($mysecprovidername, new PermissionIdentityExpansion($GGROUP, $mysecprovidername, "SALES"));
 
-log2("Now updating security cache.");
-log2("Check:");
-log2(" HR/RD groups: members wimingroup,peteringroup");
-log2(" NO wiminsalesgroup,peterinsalesgroup");
-log2(" each user: wim, peter, anne, wimingroup should have also mappings to Email security providers");
+$logger->LogWindow("Now updating security cache.");
+$logger->LogWindow("Check:");
+$logger->LogWindow(" HR/RD groups: members wimingroup,peteringroup");
+$logger->LogWindow(" NO wiminsalesgroup,peterinsalesgroup");
+$logger->LogWindow(" each user: wim, peter, anne, wimingroup should have also mappings to Email security providers");
 

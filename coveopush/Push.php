@@ -9,8 +9,7 @@ namespace Coveo\Search\SDK\SDKPushPHP;
 
 use Coveo\Search\SDK\SDKPushPHP\Constants;
 use Coveo\Search\SDK\SDKPushPHP\Document;
-use Coveo\Search\SDK\SDKPushPHP\Permissions;
-use Coveo\Search\Api\Service\LoggerInterface;
+use Coveo\Search\SDK\SDKPushPHP\DefaultLogger;
 use Exception;
 
 /**
@@ -100,13 +99,13 @@ class Push {
     public $BatchPermissions = array();
     public $MaxRequestSize = 0;
     /**
-     * @var LoggerInterface
+     * @var \Psr\Log\LoggerInterface
      */
     protected $logger;
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Default constructor used by the deserialization.
-    function __construct(string $p_SourceId, string $p_OrganizationId, string $p_ApiKey, string $p_Endpoint=null,$logger){
+    function __construct(string $p_SourceId, string $p_OrganizationId, string $p_ApiKey, string $p_Endpoint = NULL, $logger = NULL){
         /*"""
         Push Constructor.
         :arg p_SourceId: Source Id to use
@@ -115,16 +114,18 @@ class Push {
         :arg p_Endpoint: Constants.PushApiEndpoint
         """*/
         set_time_limit ( 3000 );
-        if ($p_Endpoint==null) {
+        if ($p_Endpoint == null) {
             $p_Endpoint = PushApiEndpoint::PROD_PUSH_API_URL;
         }
+
         $this->SourceId = $p_SourceId;
         $this->OrganizationId = $p_OrganizationId;
         $this->ApiKey = $p_ApiKey;
         $this->Endpoint = $p_Endpoint;
         $this->MaxRequestSize = 255052544;
-        $this->logger = $logger;
-
+        if($logger === NULL) {
+            $this->logger = new DefaultLogger();
+        }
         // validate Api Key
         $valid=preg_match('/^\w{10}-\w{4}-\w{4}-\w{4}-\w{12}$/', $p_ApiKey, $matches);
         if ($valid==0){
@@ -310,7 +311,7 @@ class Push {
         """*/
         $this->logger->debug('GetUpdateDocumentsUrl');
         $values = $this->createPath();
-        $url = replacePath( PushApiPaths::SOURCE_DOCUMENTS_BATCH, $values);
+        $url = $this->replacePath( PushApiPaths::SOURCE_DOCUMENTS_BATCH, $values);
         $this->logger->debug($url);
         return $url;
     }

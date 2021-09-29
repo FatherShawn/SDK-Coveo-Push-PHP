@@ -6,9 +6,6 @@
 // -------------------------------------------------------------------------------------
 
 namespace Coveo\Search\SDK\SDKPushPHP;
-
-use Coveo\Search\Api\Service\LoggerInterface;
-
  /**
  * Constants used within the Push Classes.
  * The default request timeout in seconds.
