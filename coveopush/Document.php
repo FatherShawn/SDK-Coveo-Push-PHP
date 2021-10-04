@@ -60,6 +60,8 @@ class Document{
         $this->Author = '';
         if($logger === NULL) {
           $this->logger = new DefaultLogger();
+        } else {
+          $this->logger = $logger;
         }
       }
 
