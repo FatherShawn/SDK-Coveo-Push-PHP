@@ -124,7 +124,9 @@ class Push {
         $this->Endpoint = $p_Endpoint;
         $this->MaxRequestSize = 255052544;
         if($logger === NULL) {
-            $this->logger = new DefaultLogger();
+          $this->logger = new DefaultLogger();
+        } else {
+          $this->logger = $logger;
         }
         // validate Api Key
         $valid=preg_match('/^\w{10}-\w{4}-\w{4}-\w{4}-\w{12}$/', $p_ApiKey, $matches);
