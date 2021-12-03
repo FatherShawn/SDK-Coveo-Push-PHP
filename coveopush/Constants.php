@@ -25,6 +25,7 @@ class Constants {
   // 32 bytes is removed from it to account for the JSON body structure.
   const MAXIMUM_REQUEST_SIZE_IN_BYTES = 250*1024*1024;
 
-    // Reserved key names (case-insensitive) used in the Push API.
-    const s_DocumentReservedKeys = array("author","clickableUri", "compressedBinaryData","compressedBinaryDataFileId","compressionType","data","date","documentId", "fileExtension", "parentId", "permissions", "orderingId" );
+  // Reserved key names (case-insensitive) used in the Push API.
+  const S_DOCUMENT_RESERVED_KEYS = array("author", "clickableUri", "compressedBinaryData", "compressedBinaryDataFileId", "compressionType", "data", "date", "documentId", "fileExtension", "parentId", "permissions", "orderingId");
+
 }

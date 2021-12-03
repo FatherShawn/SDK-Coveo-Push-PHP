@@ -409,7 +409,7 @@ class Document {
 
     // Check if in reserved keys
     $lower = strtolower($p_Key);
-    if (array_key_exists($lower, Constants::s_DocumentReservedKeys)) {
+    if (array_key_exists($lower, Constants::S_DOCUMENT_RESERVED_KEYS)) {
       $this->logger->error("AddMetadata: " . $p_Key . " is a reserved field and cannot be set as metadata.");
       return;
     }
