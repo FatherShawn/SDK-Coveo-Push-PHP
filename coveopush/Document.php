@@ -159,7 +159,7 @@ class Document {
     $all = array();
     foreach ($attributes as &$attr) {
       //echo $attr;
-      if (property_exists("Coveo\Search\\SDK\\SDKPushPHP\\Document", $attr)) {
+      if (property_exists("Coveo\\Search\\SDK\\SDKPushPHP\\Document", $attr)) {
         //echo $attr;
         if (is_array($this->{$attr})) {
           if (count($this->{$attr}) > 0) {
@@ -187,35 +187,8 @@ class Document {
    *   A JSON encoded string on success or FALSE on failure.
    */
   function cleanUp() {
-    $attributes = array(
-      'DocumentId', 'permanentid', 'Title', 'ClickableUri',
-      'Data', 'CompressedBinaryData', 'CompressedBinaryDataFileId', 'CompressionType',
-      'Date', 'ModifiedDate',
-      'FileExtension',
-      'ParentId',
-      'Author', 'Permissions'
-    );
-
-    $all = array();
-    foreach ($attributes as &$attr) {
-      if (property_exists("Coveo\Search\\SDK\\SDKPushPHP\\Document", $attr)) {
-        if (is_array($this->{$attr})) {
-          if (count($this->{$attr}) > 0) {
-            $all[$attr] = $this->{$attr};
-          }
-        }
-        else {
-          if ($this->{$attr} != "") {
-            $all[$attr] = $this->{$attr};
-          }
-        }
-      }
-    }
-    foreach ($this->MetaData as $key => $value) {
-      $all[$key] = $value;
-    }
+    $source = $this->ToJson();
     //echo json_encode($all);
-    $source = json_encode($all);
     //Debug($source);
     $result = preg_replace('/,\s*"[^"]+":null|"[^"]+":null,?/', '', $source);
     $result = preg_replace('/,\s*"[^"]+":\[\]|"[^"]+":\[\],?/', '', $source);
