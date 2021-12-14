@@ -314,19 +314,17 @@ class Document {
    *   Valid file path.
    */
   function GetFileAndCompress(string $p_FilePath) {
-    $this->logger->debug('GetFileAndCompress ');
-    $this->logger->debug($p_FilePath);
     // Check if empty
     if ($p_FilePath == '') {
-      $this->logger->error("GetFileAndCompress: value not set");
+      $this->logger->error("GetFileAndCompress: file path value not set");
       return;
     }
-
     // Check if file exists
     if (!file_exists($p_FilePath)) {
       $this->logger->error("GetFileAndCompress: file does not exists " . $p_FilePath);
       return;
     }
+    $this->logger->debug('GetFileAndCompress ' . $p_FilePath);
 
     $filecontent = file_get_contents($p_FilePath);
     $compresseddata = gzcompress($filecontent, 9);
@@ -345,14 +343,12 @@ class Document {
    *   The fileId retrieved by the GetLargeFileContainer call.
    */
   function SetCompressedDataFileId(string $p_CompressedDataFileId) {
-    $this->logger->debug('SetCompressedDataFileId ');
-    $this->logger->debug($p_CompressedDataFileId);
     // Check if empty
     if ($p_CompressedDataFileId == '') {
       $this->logger->error("SetCompressedDataFileId: value not set");
       return;
     }
-
+    $this->logger->debug('SetCompressedDataFileId ' . $p_CompressedDataFileId);
     $this->CompressedBinaryData = '';
     $this->Data = '';
     $this->CompressedBinaryDataFileId = $p_CompressedDataFileId;
@@ -367,7 +363,6 @@ class Document {
    *   The value or object to set (str or list).
    */
   function AddMetadata(string $p_Key, $p_Value) {
-    $this->logger->debug('AddMetadata');
     //Debug($p_Key . ": " . mb_convert_encoding(utf8_encode($p_Value), "UTF-8", "ASCII"));
     // Check if empty
     if ($p_Key == '') {
@@ -384,10 +379,11 @@ class Document {
 
     // Check if empty
     if ($p_Value == '' || $p_Value == NULL) {
-      $this->logger->warning("AddMetadata: value not set");
+      $this->logger->warning("AddMetadata: value not set for metadata key " . $p_Key);
       return;
     }
     else {
+      $this->logger->debug('AddMetadata: ' . $p_Key . ' = ' . $p_Value);
       $this->MetaData[$lower] = $p_Value;
     }
 
@@ -404,16 +400,15 @@ class Document {
    *   (def: FALSE) if Anonymous access is allowed.
    */
   function SetAllowedAndDeniedPermissions(array $p_AllowedPermissions, array $p_DeniedPermissions, bool $p_AllowAnonymous = NULL) {
-    if ($p_AllowAnonymous == NULL) {
-      $p_AllowAnonymous = FALSE;
-    }
-
-    $this->logger->debug('SetAllowedAndDeniedPermissions');
     // Check if empty
     if ($p_AllowedPermissions == NULL) {
       $this->logger->error("SetAllowedAndDeniedPermissions: AllowedPermissions not set");
       return;
     }
+    if ($p_AllowAnonymous == NULL) {
+      $p_AllowAnonymous = FALSE;
+    }
+    $this->logger->debug('SetAllowedAndDeniedPermissions');
     $simplePermissionLevel = new DocumentPermissionLevel('Level1');
 
     $simplePermissionSet = new DocumentPermissionSet('Set1');

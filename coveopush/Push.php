@@ -252,7 +252,7 @@ class Push {
    *   The request headers.
    */
   function GetRequestHeaders() {
-    $this->logger->debug('GetRequestHeaders');
+    // $this->logger->debug('GetRequestHeaders');
     $content = array();
     $content['Authorization'] = 'Bearer ' . $this->ApiKey;
     $content['Content-Type'] = 'application/json';
@@ -266,7 +266,7 @@ class Push {
    *   The request headers.
    */
   function GetRequestHeadersForS3() {
-    $this->logger->debug('GetRequestHeadersForS3');
+    // $this->logger->debug('GetRequestHeadersForS3');
     $content = array();
     $content['Content-Type'] = 'application/octet-stream';
     $content[HttpHeaders::AMAZON_S3_SERVER_SIDE_ENCRYPTION_NAME] = HttpHeaders::AMAZON_S3_SERVER_SIDE_ENCRYPTION_VALUE;
@@ -322,11 +322,10 @@ class Push {
    *   The url to update the push source status.
    */
   function GetStatusUrl() {
-    $this->logger->debug('GetStatusUrl');
     $values = $this->createPath();
     $url = $this->replacePath(PushApiPaths::SOURCE_ACTIVITY_STATUS, $values);
 
-    $this->logger->debug($url);
+    $this->logger->debug('GetStatusUrl ' . $url);
     return $url;
   }
 
@@ -337,9 +336,8 @@ class Push {
    *   The OrderingId.
    */
   function CreateOrderingId() {
-    $this->logger->debug('CreateOrderingId');
     $ordering_id = round((microtime(true) * 1000), 0);
-    $this->logger->debug($ordering_id);
+    $this->logger->debug('CreateOrderingId' . $ordering_id);
     return $ordering_id;
   }
 
@@ -350,10 +348,9 @@ class Push {
    *   Url for large File container.
    */
   function GetLargeFileContainerUrl() {
-    $this->logger->debug('GetLargeFileContainerUrl');
     $values = $this->createPath();
     $url = $this->replacePath(PushApiPaths::DOCUMENT_GET_CONTAINER, $values);
-    $this->logger->debug($url);
+    $this->logger->debug('GetLargeFileContainerUrl ' . $url);
     return $url;
   }
 
@@ -364,11 +361,9 @@ class Push {
    *   The Document url.
    */
   function GetUpdateDocumentUrl() {
-    $this->logger->debug('GetUpdateDocumentUrl');
     $values = $this->createPath();
     $url = $this->replacePath(PushApiPaths::SOURCE_DOCUMENTS, $values);
-
-    $this->logger->debug($url);
+    $this->logger->debug('GetUpdateDocumentUrl ' . $url);
     return $url;
   }
 
@@ -384,11 +379,10 @@ class Push {
    *   Url to get security provider.
    */
   function GetSecurityProviderUrl(string $p_Endpoint, string $p_SecurityProviderId) {
-     $this->logger->debug('GetSecurityProviderUrl');
-     $values = $this->createPath($p_Endpoint);
+    $values = $this->createPath($p_Endpoint);
     $values['prov_id'] = $p_SecurityProviderId;
-    $url = $this->replacePath( PlatformPaths::CREATE_PROVIDER, $values);
-    $this->logger->debug($url);
+    $url = $this->replacePath(PlatformPaths::CREATE_PROVIDER, $values);
+    $this->logger->debug('GetSecurityProviderUrl ' . $url);
     return $url;
   }
 
@@ -399,10 +393,9 @@ class Push {
    *   Url to delete document.
    */
   function GetDeleteDocumentUrl() {
-    $this->logger->debug('GetDeleteDocumentUrl');
     $values = $this->createPath();
     $url = $this->replacePath(PushApiPaths::SOURCE_DOCUMENTS, $values);
-    $this->logger->debug($url);
+    $this->logger->debug('GetDeleteDocumentUrl ' . $url);
     return $url;
   }
 
@@ -413,10 +406,9 @@ class Push {
    *   Url to update document.
    */
   function GetUpdateDocumentsUrl() {
-    $this->logger->debug('GetUpdateDocumentsUrl');
     $values = $this->createPath();
     $url = $this->replacePath(PushApiPaths::SOURCE_DOCUMENTS_BATCH, $values);
-    $this->logger->debug($url);
+    $this->logger->debug('GetUpdateDocumentsUrl ' . $url);
     return $url;
   }
 
@@ -427,10 +419,9 @@ class Push {
    *   URL to get documents older than
    */
   function GetDeleteOlderThanUrl() {
-    $this->logger->debug('GetDeleteOlderThanUrl');
     $values = $this->createPath();
     $url = $this->replacePath(PushApiPaths::SOURCE_DOCUMENTS_DELETE, $values);
-    $this->logger->debug($url);
+    $this->logger->debug('GetDeleteOlderThanUrl ' . $url);
     return $url;
   }
 
@@ -446,11 +437,10 @@ class Push {
    *   Path.
    */
   function GetUrl(string $path, string $prov_id = '') {
-    $this->logger->debug('GetUrl');
     $values = $this->createPath();
     $values['prov_id'] = $prov_id;
-    $url = $this->replacePath( $path, $values);
-    $this->logger->debug($url);
+    $url = $this->replacePath($path, $values);
+    $this->logger->debug('GetUrl ' . $url);
     return $url;
   }
 
@@ -509,13 +499,12 @@ class Push {
    *   The json response.
    */
   function doPost($url, $headers, array $postdata) {
-    $this->logger->debug('doPost');
     $headers = array_merge($headers, array('Connection' => 'close'));
     $opts = array('http' =>
-        array(
-            'method'  => 'POST',
-            'header'  => $this->arrayToStr($headers)
-        )
+      array(
+        'method'  => 'POST',
+        'header'  => $this->arrayToStr($headers),
+      )
     );
     if ($postdata !== NULL) {
       $params = http_build_query($postdata);
@@ -528,8 +517,9 @@ class Push {
     if ($result === FALSE) {
       $this->logger->debug('POST Request failed: ' . $url);
       return FALSE;
-    } 
+    }
     else {
+      $this->logger->debug('POST Request succeeded: ' . $url);
       $json = json_decode($result, TRUE);
       return $json;
     }
@@ -551,12 +541,11 @@ class Push {
    *   The json response.
    */
   function doPut($url, $headers, $data, $params = NULL) {
-    $this->logger->debug('doPut');
     $headers = array_merge($headers, array('Connection' => 'close'));
     $opts = array('http' =>
       array(
-          'method'  => 'PUT',
-          'header'  => $this->arrayToStr($headers)
+        'method'  => 'PUT',
+        'header'  => $this->arrayToStr($headers),
       )
     );
     if ($data !== NULL) {
@@ -575,6 +564,7 @@ class Push {
       return FALSE;
     }
     else {
+      $this->logger->debug('PUT Request succeeded: ' . $url);
       $json = json_decode($result, TRUE);
       return $json;
     }
@@ -596,7 +586,6 @@ class Push {
    *   The json response.
    */
   function doDelete($url, $headers, $params = NULL, $data = NULL) {
-    $this->logger->debug('doDelete');
     $headers = array_merge($headers, array('Connection' => 'close'));
 
     $opts = array('http' =>
@@ -622,6 +611,7 @@ class Push {
       return FALSE;
     }
     else {
+      $this->logger->debug('DELETE Request succeeded: ' . $url);
       //echo json_decode($result, TRUE);
       $json = json_decode($result, TRUE);
       return $json;
@@ -638,14 +628,16 @@ class Push {
    *   True if source srarus is updated. false if it failed to update.
    */
   function UpdateSourceStatus(string $p_SourceStatus) {
-    $this->logger->debug('UpdateSourceStatus, Changing status to ' . $p_SourceStatus);
+
     $params = array(Parameters::STATUS_TYPE => $p_SourceStatus);
 
     $result = $this->doPost($this->GetStatusUrl(), $this->GetRequestHeaders(), $params);
     if ($result != FALSE) {
+      $this->logger->debug('UpdateSourceStatus, Changing status to ' . $p_SourceStatus . ' succeeded.');
       return TRUE;
     }
     else {
+      $this->logger->debug('UpdateSourceStatus, Changing status to ' . $p_SourceStatus . ' failed.');
       return FALSE;
     }
   }
@@ -657,14 +649,16 @@ class Push {
    *   LargeFileContainer Class.
    */
   function GetLargeFileContainer() {
-    $this->logger->debug('GetLargeFileContainer ' . $this->GetLargeFileContainerUrl());
     $params = array();
-    $result = $this->doPost($this->GetLargeFileContainerUrl(), $this->GetRequestHeaders(), $params);
+    $url = $this->GetLargeFileContainerUrl();
+    $result = $this->doPost($url, $this->GetRequestHeaders(), $params);
     if ($result != FALSE) {
+      $this->logger->debug('GetLargeFileContainer ' . $url . ' succeeded.');
       $results = new LargeFileContainer($result);
       return $results;
     }
     else {
+      $this->logger->debug('GetLargeFileContainer ' . $url . ' failed.');
       return NULL;
     }
   }
@@ -716,9 +710,11 @@ class Push {
     }
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $p_CompressedFile);
     if ($result != FALSE) {
+      $this->logger->debug('UploadDocument ' . $p_UploadUri . ' succeeded.');
       return TRUE;
     }
     else {
+      $this->logger->debug('UploadDocument ' . $p_UploadUri . ' failed.');
       return FALSE;
     }
 
@@ -738,8 +734,6 @@ class Push {
    *   True if document was uploaded, false if not.
    */
   function UploadDocuments(string $p_UploadUri, array $p_ToAdd, array $p_ToDelete) {
-    $this->logger->debug('UploadDocuments ' . $p_UploadUri);
-
     if ($p_UploadUri == NULL) {
       $this->logger->debug("UploadDocument: p_UploadUri is not present");
       return;
@@ -752,12 +746,14 @@ class Push {
     $data = new BatchDocument();
     $data->AddOrUpdate = $p_ToAdd;
     $data->Delete = $p_ToDelete;
-    error_log(json_encode($data));
+    // error_log(json_encode($data));
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $this->cleanJSON($data));
     if ($result != FALSE) {
+      $this->logger->debug('UploadDocuments ' . $p_UploadUri . ' succeeded.');
       return TRUE;
     }
     else {
+      $this->logger->debug('UploadDocuments ' . $p_UploadUri . ' failed.');
       return FALSE;
     }
   }
@@ -770,8 +766,6 @@ class Push {
    * @return void
    */
   function UploadPermissions(string $p_UploadUri) {
-    $this->logger->debug('UploadPermissions ' . $p_UploadUri);
-
     if ($p_UploadUri == NULL) {
       $this->logger->debug("UploadPermissions: p_UploadUri is not present");
       return;
@@ -781,9 +775,13 @@ class Push {
     $this->logger->debug("JSON: " . $permissions);
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $permissions);
     if ($result != FALSE) {
+
+      $this->logger->debug('UploadPermissions ' . $p_UploadUri . ' succeeded.');
       return TRUE;
     }
     else {
+
+      $this->logger->debug('UploadPermissions ' . $p_UploadUri . ' failed.');
       return FALSE;
     }
   }
@@ -818,7 +816,7 @@ class Push {
    */
   function UploadDocumentIfTooLarge(Document $p_Document) {
     $size = strlen($p_Document->Data) + strlen($p_Document->CompressedBinaryData);
-    $this->logger->debug('UploadDocumentIfTooLarge size = ' . $size);
+    $this->logger->debug('UploadDocumentIfTooLarge documentId: ' . $p_Document->DocumentId . ' size = ' . $size);
 
     if ($size > Constants::COMPRESSED_DATA_MAX_SIZE_IN_BYTES) {
       $data = '';
@@ -846,20 +844,17 @@ class Push {
    *   True if document is uploaded, false if not.
    */
   function AddUpdateDocumentRequest(Document $p_CoveoDocument, int $orderingId = NULL) {
-    $this->logger->debug('AddUpdateDocumentRequest');
     $params = array(Parameters::DOCUMENT_ID => $p_CoveoDocument->DocumentId);
 
     if ($orderingId != NULL) {
       $params[Parameters::ORDERING_ID] = $orderingId;
     }
-
-    $this->logger->debug(json_encode($params));
-
     // Set the compression type parameter
-    if ($p_CoveoDocument->CompressedBinaryData != '' || $p_CoveoDocument->CompressedBinaryDataFileId != ''){
+    if ($p_CoveoDocument->CompressedBinaryData != '' || $p_CoveoDocument->CompressedBinaryDataFileId != '') {
       $params[Parameters::COMPRESSION_TYPE] = $p_CoveoDocument->CompressionType;
     }
 
+    // $this->logger->debug('AddUpdateDocumentRequest' . json_encode($params));
     $body = json_encode($p_CoveoDocument->cleanUp());
     // self.logger.debug(body)
     $result = $this->doPut($this->GetUpdateDocumentUrl(), $this->GetRequestHeaders(), $body, $params);
@@ -885,7 +880,7 @@ class Push {
   *   True if the docuemnt is deleted. false if delete document request failed.
   */
   function DeleteDocument(string $p_DocumentId, int $orderingId = NULL, bool $deleteChildren = NULL) {
-    $this->logger->debug('DeleteDocument');
+    // $this->logger->debug('DeleteDocument');
     if ($deleteChildren == NULL) {
       $deleteChildren = FALSE;
     }
@@ -900,7 +895,7 @@ class Push {
       $params[Parameters::DELETE_CHILDREN] = "true";
     }
 
-    $this->logger->debug(json_encode($params));
+    $this->logger->debug('DeleteDocument' . json_encode($params));
 
     $result = $this->doDelete($this->GetDeleteDocumentUrl(), $this->GetRequestHeaders(), $params);
     if ($result != FALSE) {
@@ -922,13 +917,13 @@ class Push {
    * @return bool
    *   True if request seccessed, false if request failed.
    */
-  function DeleteOlderThan(float $orderingId = NULL, int $queueDelay = NULL){
-    $this->logger->debug('DeleteOlderThan orderingId: '.$orderingId.', queueDelay: '.$queueDelay);
-    // Validate
+  function DeleteOlderThan(float $orderingId = NULL, int $queueDelay = NULL) {
+     // Validate
     if ($orderingId <= 0) {
       $this->logger->debug("DeleteOlderThan: orderingId must be a positive 64 bit float.");
       return;
     }
+    $this->logger->debug('DeleteOlderThan orderingId: ' . $orderingId . ', queueDelay: ' . $queueDelay);
 
     $params = array( Parameters::ORDERING_ID => $orderingId);
 
@@ -964,7 +959,6 @@ class Push {
    *   Ordering Id.
    */
   function AddSingleDocument(Document $p_CoveoDocument, bool $updateStatus = NULL, int $orderingId = NULL) {
-    $this->logger->debug('AddSingleDocument ' . $p_CoveoDocument->DocumentId);
     // Single Call
     // First check
     list($valid, $error) = $p_CoveoDocument->Validate();
@@ -972,6 +966,7 @@ class Push {
       $this->logger->debug("AddSingleDocument: " . $error);
       return;
     }
+    $this->logger->debug('AddSingleDocument ' . $p_CoveoDocument->DocumentId);
 
     // Update Source Status
     if ($updateStatus == TRUE || $updateStatus == NULL) {
@@ -1007,7 +1002,7 @@ class Push {
    *   (FALSE), if children must be deleted.
    */
   function RemoveSingleDocument(string $p_DocumentId, bool $updateStatus = NULL, int $orderingId = NULL, bool $deleteChildren = NULL) {
-    $this->logger->debug('RemoveSingleDocument ');
+    $this->logger->debug('RemoveSingleDocument ' . $p_DocumentId);
     // Single Call
 
     // Update Source Status
@@ -1081,21 +1076,21 @@ class Push {
     $currentBatchToAddUpdate = array();
 
     $totalSize = 0;
+    $size_max_req = $this->GetSizeMaxRequest();
     foreach ($p_Documents as $document) {
       // Add 1 byte to account for the comma in the JSON array.
       // documentSize = len(json.dumps(document,default=lambda x: x.__dict__)) + 1
       $documentSize = strlen($document->ToJson()) + 1;
 
       $totalSize += $documentSize;
-      $this->logger->debug("Doc: ".$document->DocumentId);
-      $this->logger->debug("Currentsize: ".$totalSize . " vs max: ".($this->GetSizeMaxRequest()));
+      $this->logger->debug("Doc: " . $document->DocumentId . " Currentsize: " . $totalSize . " vs max: " . $size_max_req);
 
-      if ($documentSize > $this->GetSizeMaxRequest()){
-        $this->logger->debug("No document can be larger than " . $this->GetSizeMaxRequest()." bytes in size.");
+      if ($documentSize > $size_max_req) {
+        $this->logger->debug("No document can be larger than " . $size_max_req . " bytes in size.");
         return;
       }
 
-        if ($totalSize > $this->GetSizeMaxRequest() - (count($currentBatchToAddUpdate) + count($currentBatchToDelete))){
+      if ($totalSize > $size_max_req - (count($currentBatchToAddUpdate) + count($currentBatchToDelete))) {
         $this->UploadBatch($currentBatchToAddUpdate, $currentBatchToDelete);
         $currentBatchToAddUpdate = array();
         $currentBatchToDelete = array();
@@ -1136,22 +1131,13 @@ class Push {
    * @return void
    */
   function AddDocuments(array $p_CoveoDocumentsToAdd, array $p_CoveoDocumentsToDelete, bool $p_UpdateStatus = NULL, bool $p_DeleteOlder = NULL) {
-    if ($p_UpdateStatus == NULL) {
-      $p_UpdateStatus = TRUE;
-    }
-    if ($p_DeleteOlder == NULL) {
-      $p_DeleteOlder = FALSE;
-    }
-    $this->logger->debug('AddDocuments');
-    // Batch Call
-    // First check
-    $StartOrderingId = $this->CreateOrderingId();
-
     if ($p_CoveoDocumentsToAdd == NULL && $p_CoveoDocumentsToDelete == NULL) {
       $this->logger->debug("AddDocuments: p_CoveoDocumentsToAdd and p_CoveoDocumentsToDelete is empty");
       return;
     }
-
+    if ($p_UpdateStatus == NULL) {
+      $p_UpdateStatus = TRUE;
+    }
     // Update Source Status
     if ($p_UpdateStatus) {
       $this->UpdateSourceStatus(SourceStatusType::Rebuild);
@@ -1168,9 +1154,17 @@ class Push {
 
     $this->ProcessAndUploadBatch($allDocuments);
 
+    if ($p_DeleteOlder == NULL) {
+      $p_DeleteOlder = FALSE;
+    }
+
     // Delete Older Documents
     if ($p_DeleteOlder) {
-      $this->DeleteOlderThan($StartOrderingId);
+      // $this->logger->debug('AddDocuments');
+      // Batch Call
+      // First check
+      $startOrderingId = $this->CreateOrderingId();
+      $this->DeleteOlderThan($startOrderingId);
     }
 
     // Update Source Status
@@ -1212,7 +1206,7 @@ class Push {
    *   Coveo Document of CoveoDocumentToDelete.
    */
   function Add($p_CoveoDocument) {
-    $this->logger->debug('Add');
+    // $this->logger->debug('Add');
 
     if ($p_CoveoDocument == NULL) {
       $this->logger->debug("Add: p_CoveoDocument is empty");
@@ -1220,17 +1214,16 @@ class Push {
     }
 
     $documentSize = strlen($p_CoveoDocument->ToJson()) + 1;
-
+    $size_max_req = $this->GetSizeMaxRequest();
     $this->totalSize += $documentSize;
-    $this->logger->debug("Doc: ".$p_CoveoDocument->DocumentId);
-    $this->logger->debug("Currentsize: ".$this->totalSize . " vs max: ".$this->GetSizeMaxRequest());
+    $this->logger->debug("Doc: " . $p_CoveoDocument->DocumentId . "Currentsize: " . $this->totalSize . " vs max: " . $size_max_req);
 
-    if ($documentSize > $this->GetSizeMaxRequest()){
-      $this->logger->debug("No document can be larger than " . $this->GetSizeMaxRequest()." bytes in size.");
+    if ($documentSize > $size_max_req) {
+      $this->logger->debug("No document can be larger than " . $size_max_req . " bytes in size.");
       return;
     }
 
-    if ($this->totalSize > $this->GetSizeMaxRequest() - (count($this->ToAdd) + count($this->ToDel))){
+    if ($this->totalSize > $size_max_req - (count($this->ToAdd) + count($this->ToDel))) {
       $this->UploadBatch($this->ToAdd, $this->ToDel);
       $this->ToAdd = array();
       $this->ToDel = array();
@@ -1260,19 +1253,20 @@ class Push {
    *   (True), if the source status should be updated.
    * @param bool|null $p_DeleteOlder
    *   (FALSE), if older documents should be removed from the index after the new push.
-   * @return void
    */
   function End(bool $p_UpdateStatus = NULL, bool $p_DeleteOlder = NULL) {
 
     if ($p_UpdateStatus == NULL) {
       $p_UpdateStatus = TRUE;
     }
+
+    // $this->logger->debug('End');
+    // Batch Call
+    $this->UploadBatch($this->ToAdd, $this->ToDel);
+
     if ($p_DeleteOlder == NULL) {
       $p_DeleteOlder = FALSE;
     }
-    $this->logger->debug('End');
-    // Batch Call
-    $this->UploadBatch($this->ToAdd, $this->ToDel);
 
     if ($p_DeleteOlder) {
       // Delete Older Documents
@@ -1314,11 +1308,11 @@ class Push {
     $secProvider->nodeRequired = FALSE;
     $secProvider->cascadingSecurityProviders = $p_CascadingTo;
 
-    $this->logger->debug('AddSecurityProvider');
+    // $this->logger->debug('AddSecurityProvider');
 
     // make POST request to change status
     $provider = $this->cleanJSON($secProvider);
-    $this->logger->debug("JSON: " . $provider);
+    $this->logger->debug("AddSecurityProvider JSON: " . $provider);
     $result = $this->doPut($this->GetSecurityProviderUrl($p_Endpoint, $p_SecurityProviderId), $this->GetRequestHeaders(), $provider);
     if ($result != FALSE) {
       return TRUE;
@@ -1346,7 +1340,7 @@ class Push {
    *   ordering Id.
    */
   function AddPermissionExpansion(string $p_SecurityProviderId, PermissionIdentityExpansion $p_Identity, array $p_Members, array $p_Mappings, array $p_WellKnowns, int $orderingId = NULL) {
-     $this->logger->debug('AddPermissionExpansion');
+    //  $this->logger->debug('AddPermissionExpansion');
 
     $permissionIdentityBody = new PermissionIdentityBody($p_Identity);
     $permissionIdentityBody->AddMembers($p_Members);
@@ -1370,7 +1364,7 @@ class Push {
 
     $identity = $this->cleanJSON($permissionIdentityBody);
 
-    $this->logger->debug('JSON: ' . $identity);
+    $this->logger->debug('AddPermissionExpansion JSON: ' . $identity);
 
     $result = $this->doPut($resourcePath, $this->GetRequestHeaders(), $identity, $params);
     if ($result != FALSE) {
@@ -1504,7 +1498,7 @@ class Push {
   }
 
   /**
-   * RemovePermissionIdentity. Remove a single Permission Mapping
+   * Remove a single Permission Mapping.
    *
    * @param string $p_SecurityProviderId
    *   Security Provider to use.
