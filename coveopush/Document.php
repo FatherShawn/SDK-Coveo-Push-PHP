@@ -1,10 +1,5 @@
 <?php
-// -------------------------------------------------------------------------------------
-// CoveoDocument
-// -------------------------------------------------------------------------------------
-// Contains the CoveoDocument class
-//   A CoveoDocument will be pushed to the push source
-// -------------------------------------------------------------------------------------
+
 namespace Coveo\Search\SDK\SDKPushPHP;
 
 use \DateTime;
@@ -62,16 +57,11 @@ class Document {
     $this->ParentId = '';
     $this->ClickableUri = '';
     $this->Author = '';
-    if ($logger === NULL) {
-      $this->logger = new DefaultLogger();
-    }
-    else {
-      $this->logger = $logger;
-    }
+    $this->logger = $logger ?? new DefaultLogger();
   }
 
   /**
-   * Has document.
+   * Hash document.
    *
    * @param string $documentId
    *   The document Id.
@@ -103,7 +93,7 @@ class Document {
   }
 
   /**
-   * Validates if all properties on the CoveoDocument are properly set.
+   * Validates if all properties on the Coveo Document are properly set.
    *
    * @return bool|Exception
    */

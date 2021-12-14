@@ -1,8 +1,14 @@
 <?php
 
 namespace Coveo\Search\SDK\SDKPushPHP;
-use Psr\Log\LoggerInterface;
 
+use Psr\Log\InvalidArgumentException;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
+
+/**
+ * Default PSR Logger.
+ */
 class DefaultLogger implements LoggerInterface {
 
   /**
@@ -31,51 +37,187 @@ class DefaultLogger implements LoggerInterface {
    *
    * @param string $message
    *   Message to log.
-   * @param array $context
+   * @param mixed[] $context
+   *   Context.
    */
   function emergency($message, array $context = array()) {
-    error_log('emergency: ' . $message, 0);
-    $this->LogWindow('emergency: ' . $message);
-  }
-
-  function alert($message, array $context = array()){
-    error_log('alert: ' . $message, 0);
-    $this->LogWindow('alert: ' . $message);
-  }
-
-    function critical($message, array $context = array()){
-    error_log('Critical: ' . $message, 0);
-    $this->LogWindow('Critical: ' . $message);
+    if (!self::$isEnabled) {
+      return;
     }
-
-  function error($message, array $context = array()){
-    error_log('Error: ' . $message, 0);
-    $this->LogWindow('Error: ' . $message);
+    $level = LogLevel::EMERGENCY . ': ';
+    error_log($level . $message, 0);
+    $this->LogWindow($level . $message);
   }
 
-    function warning($message, array $context = array()){
-      error_log('Warning: ' . $message, 0);
-      $this->LogWindow('Warning: ' . $message);
+  /**
+   * Log alert type messages.
+   *
+   * @param string $message
+   *   Message to log.
+   * @param mixed[] $context
+   *   Context.
+   */
+  function alert($message, array $context = array()) {
+    if (!self::$isEnabled) {
+      return;
     }
+    $level = LogLevel::ALERT . ': ';
+    error_log($level . $message, 0);
+    $this->LogWindow($level . $message);
+  }
 
+   /**
+   * Log critical type messages.
+   *
+   * @param string $message
+   *   Message to log.
+   * @param mixed[] $context
+   *   Context.
+   */
+  function critical($message, array $context = array()) {
+    if (!self::$isEnabled) {
+      return;
+    }
+    $level = LogLevel::CRITICAL . ': ';
+    error_log($level . $message, 0);
+    $this->LogWindow($level . $message);
+  }
+
+  /**
+   * Log error type messages.
+   *
+   * @param string $message
+   *   Message to log.
+   * @param mixed[] $context
+   *   Context.
+   */
+  function error($message, array $context = array()) {
+    if (!self::$isEnabled) {
+      return;
+    }
+    $level = LogLevel::ERROR . ': ';
+    error_log($level . $message, 0);
+    $this->LogWindow($level . $message);
+  }
+
+  /**
+   * Log warning type messages.
+   *
+   * @param string $message
+   *   Message to log.
+   * @param mixed[] $context
+   *   Context.
+   */
+  function warning($message, array $context = array()) {
+    if (!self::$isEnabled) {
+      return;
+    }
+    $level = LogLevel::WARNING . ': ';
+    error_log($level . $message, 0);
+    $this->LogWindow($level . $message);
+  }
+
+  /**
+   * Log notice type messages.
+   *
+   * @param string $message
+   *   Message to log.
+   * @param mixed[] $context
+   *   Context.
+   */
   function notice($message, array $context = array()){
-    error_log('Notice: ' . $message, 0);
-    $this->LogWindow('Notice: ' . $message);
-   }
+    if (!self::$isEnabled) {
+      return;
+    }
+    $level = LogLevel::NOTICE . ': ';
+    error_log($level . $message, 0);
+    $this->LogWindow($level . $message);
+  }
 
+  /**
+   * Log info type messages.
+   *
+   * @param string $message
+   *   Message to log.
+   * @param mixed[] $context
+   *   Context.
+   */
   function info($message, array $context = array()) {
-    error_log('Info: ' . $message, 0);
-    $this->LogWindow('Info: ' . $message);
+    if (!self::$isEnabled) {
+      return;
+    }
+    $level = LogLevel::INFO . ': ';
+    error_log($level . $message, 0);
+    $this->LogWindow($level . $message);
   }
 
+  /**
+   * Log debug type messages.
+   *
+   * @param string $message
+   *   Message to log.
+   * @param mixed[] $context
+   *   Context.
+   */
   function debug($message, array $context = array()) {
-    error_log('Debug: ' . $message, 0);
-    $this->LogWindow('Debug: ' . $message);
+    if (!self::$isEnabled) {
+      return;
+    }
+    $level = LogLevel::DEBUG . ': ';
+    error_log($level . $message, 0);
+    $this->LogWindow($level . $message);
   }
 
+  /**
+   * Log type messages.
+   *
+   * @param Psr\Log\LogLevel $level
+   *   Level.
+   * @param string $message
+   *   Message to log.
+   * @param mixed[] $context
+   *   Context.
+   */
   function log($level, $message, array $context = array()) {
-    error_log('Log: ' . $message, 0);
-    $this->LogWindow('Log: ' . $message);
+    if (!self::$isEnabled) {
+      return;
+    }
+    switch ($level) {
+      case LogLevel::EMERGENCY:
+        $this->emergency($message, $context);
+        break;
+
+      case LogLevel::ALERT:
+        $this->alert($message, $context);
+        break;
+
+      case LogLevel::CRITICAL:
+        $this->critical($message, $context);
+        break;
+
+      case LogLevel::ERROR:
+        $this->error($message, $context);
+        break;
+
+      case LogLevel::WARNING:
+        $this->warning($message, $context);
+        break;
+
+      case LogLevel::NOTICE:
+        $this->notice($message, $context);
+        break;
+
+      case LogLevel::INFO:
+        $this->info($message, $context);
+        break;
+
+      case LogLevel::DEBUG:
+        $this->debug($message, $context);
+        break;
+
+      default:
+        throw new InvalidArgumentException("Unknown severity level");
+    }
   }
 
   function LogWindow($err) {

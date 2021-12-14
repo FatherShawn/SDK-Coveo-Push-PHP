@@ -7,7 +7,11 @@ namespace Coveo\Search\SDK\SDKPushPHP;
  */
 class DocumentPermissionLevel {
 
-  // The name of the permission level.
+  /**
+   *  The name of the permission level.
+   *
+   * @var string
+   */
   public $Name = '';
 
   /**

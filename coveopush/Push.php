@@ -189,12 +189,7 @@ class Push {
     $this->ApiKey = $p_ApiKey;
     $this->Endpoint = $p_Endpoint;
     $this->MaxRequestSize = 255052544;
-    if ($logger === NULL) {
-      $this->logger = new DefaultLogger();
-    }
-    else {
-      $this->logger = $logger;
-    }
+    $this->logger = $logger ?? new DefaultLogger();
     // validate Api Key
     $valid = preg_match('/^\w{10}-\w{4}-\w{4}-\w{4}-\w{12}$/', $p_ApiKey, $matches);
     if ($valid == 0) {
@@ -280,7 +275,7 @@ class Push {
   }
 
   /**
-   * Undocumented function
+   * Create url.
    *
    * @param string $myEndpoint
    *   Endpoint URL.
@@ -533,7 +528,8 @@ class Push {
     if ($result === FALSE) {
       $this->logger->debug('POST Request failed: ' . $url);
       return FALSE;
-    } else {
+    } 
+    else {
       $json = json_decode($result, TRUE);
       return $json;
     }
