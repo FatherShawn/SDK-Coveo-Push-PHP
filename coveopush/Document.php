@@ -131,7 +131,12 @@ class Document {
       array_push($error, 'DocumentId is not a valid URL format:' . $this->DocumentId);
       $result = FALSE;
     }
-    $this->logger->info('[Validate Document] ' . implode(' | ', $error));
+    if (count($error) > 0) {
+      $this->logger->info('[Validate Document] ' . $this->DocumentId . implode(' | ', $error));
+    }
+    else {
+      $this->logger->info('Document ' . $this->DocumentId . ' is valid.');
+    }
     return array($result, implode(' | ', $error));
   }
 
