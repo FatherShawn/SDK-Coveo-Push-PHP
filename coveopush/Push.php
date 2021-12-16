@@ -630,11 +630,9 @@ class Push {
 
     $result = $this->doPost($this->GetStatusUrl(), $this->GetRequestHeaders(), $params);
     if ($result != FALSE) {
-      $this->logger->debug('UpdateSourceStatus, Changing status to ' . $p_SourceStatus . ' succeeded.');
       return TRUE;
     }
     else {
-      $this->logger->debug('UpdateSourceStatus, Changing status to ' . $p_SourceStatus . ' failed.');
       return FALSE;
     }
   }
@@ -650,12 +648,10 @@ class Push {
     $url = $this->GetLargeFileContainerUrl();
     $result = $this->doPost($url, $this->GetRequestHeaders(), $params);
     if ($result != FALSE) {
-      $this->logger->debug('GetLargeFileContainer ' . $url . ' succeeded.');
       $results = new LargeFileContainer($result);
       return $results;
     }
     else {
-      $this->logger->debug('GetLargeFileContainer ' . $url . ' failed.');
       return NULL;
     }
   }
@@ -707,11 +703,9 @@ class Push {
     }
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $p_CompressedFile);
     if ($result != FALSE) {
-      $this->logger->debug('UploadDocument ' . $p_UploadUri . ' succeeded.');
       return TRUE;
     }
     else {
-      $this->logger->debug('UploadDocument ' . $p_UploadUri . ' failed.');
       return FALSE;
     }
 
@@ -746,11 +740,9 @@ class Push {
     // error_log(json_encode($data));
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $this->cleanJSON($data));
     if ($result != FALSE) {
-      $this->logger->debug('UploadDocuments ' . $p_UploadUri . ' succeeded.');
       return TRUE;
     }
     else {
-      $this->logger->debug('UploadDocuments ' . $p_UploadUri . ' failed.');
       return FALSE;
     }
   }
@@ -772,13 +764,9 @@ class Push {
     $this->logger->debug("JSON: " . $permissions);
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $permissions);
     if ($result != FALSE) {
-
-      $this->logger->debug('UploadPermissions ' . $p_UploadUri . ' succeeded.');
       return TRUE;
     }
     else {
-
-      $this->logger->debug('UploadPermissions ' . $p_UploadUri . ' failed.');
       return FALSE;
     }
   }
