@@ -264,8 +264,6 @@ class Document {
    *   (def: ZLIB), CompressionType to Use.
    */
   function SetCompressedEncodedData(string $p_CompressedEncodedData, $p_CompressionType = NULL) {
-    $this->logger->debug('SetCompressedEncodedData');
-    // Check if empty
     if ($p_CompressedEncodedData == '') {
       $this->logger->error("SetCompressedEncodedData: value not set");
       return;
@@ -320,7 +318,6 @@ class Document {
       $this->logger->error("GetFileAndCompress: file does not exists " . $p_FilePath);
       return;
     }
-    $this->logger->debug('GetFileAndCompress ' . $p_FilePath);
 
     $filecontent = file_get_contents($p_FilePath);
     $compresseddata = gzcompress($filecontent, 9);
@@ -375,11 +372,10 @@ class Document {
 
     // Check if empty
     if ($p_Value == '' || $p_Value == NULL) {
-      $this->logger->warning("AddMetadata: value not set for metadata key " . $p_Key);
+      $this->logger->debug("AddMetadata: value not set for metadata key " . $p_Key);
       return;
     }
     else {
-      $this->logger->debug('AddMetadata: ' . $p_Key . ' = ' . $p_Value);
       $this->MetaData[$lower] = $p_Value;
     }
 
@@ -401,7 +397,6 @@ class Document {
       $this->logger->error("SetAllowedAndDeniedPermissions: AllowedPermissions not set");
       return;
     }
-    $this->logger->debug('SetAllowedAndDeniedPermissions');
     $simplePermissionLevel = new DocumentPermissionLevel('Level1');
 
     $simplePermissionSet = new DocumentPermissionSet('Set1');
