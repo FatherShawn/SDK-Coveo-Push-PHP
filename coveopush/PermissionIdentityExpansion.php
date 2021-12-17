@@ -50,7 +50,7 @@ class PermissionIdentityExpansion {
   *   Security Provider name.
   * @param string $p_Identity
   *   Identity to add.
-  * @param array|NULL $p_AdditionalInfo
+  * @param array|null $p_AdditionalInfo
   *   AdditionalInfo dict {} to add.
   */
   function __construct( string $p_IdentityType, string $p_SecurityProvider, string $p_Identity, array $p_AdditionalInfo = NULL) {
@@ -59,4 +59,5 @@ class PermissionIdentityExpansion {
     $this->type = $p_IdentityType;
     $this->additionalInfo = $p_AdditionalInfo ?? array();
   }
+
 }

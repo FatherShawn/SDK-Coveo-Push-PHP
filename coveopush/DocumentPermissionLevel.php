@@ -8,7 +8,7 @@ namespace Coveo\Search\SDK\SDKPushPHP;
 class DocumentPermissionLevel {
 
   /**
-   *  The name of the permission level.
+   * The name of the permission level.
    *
    * @var string
    */
@@ -39,9 +39,8 @@ class DocumentPermissionLevel {
    *   DocumentPermissionSet.
    */
   function AddPermissionSet(DocumentPermissionSet $p_DocumentPermissionSet) {
-    //Debug('AddPermissionSet');
     // Check if correct
-    if (!is_a($p_DocumentPermissionSet, 'Coveo\\SDK\\SDKPushPHP\\DocumentPermissionSet')) {
+    if (!is_a($p_DocumentPermissionSet, 'Coveo\\Search\\SDK\\SDKPushPHP\\DocumentPermissionSet')) {
       //Error( "AddPermissionSet: value is not of type DocumentPermissionSet");
       return;
     }

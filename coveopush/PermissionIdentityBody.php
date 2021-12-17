@@ -50,7 +50,7 @@ class PermissionIdentityBody {
    *   Identity name.
    */
   function __construct(PermissionIdentityExpansion $p_Identity) {
-    if (!is_a($p_Identity, 'Coveo\\SDK\\SDKPushPHP\\PermissionIdentityExpansion')) {
+    if (!is_a($p_Identity, 'Coveo\\Search\\SDK\\SDKPushPHP\\PermissionIdentityExpansion')) {
       //Error("PermissionIdentityBody constructor: value is not of type PermissionIdentityExpansion");
       return;
     }
@@ -74,23 +74,19 @@ class PermissionIdentityBody {
     if ($p_PermissionIdentities == NULL || empty($p_PermissionIdentities)) {
       return;
     }
-
     if (!is_array($p_PermissionIdentities)) {
       $p_PermissionIdentities = array($p_PermissionIdentities);
     }
-    // $type = ($p_PermissionIdentities[0] instanceof PermissionIdentityExpansion);
-    //Debug(json_encode($p_PermissionIdentities));
-    if (!is_a($p_PermissionIdentities[0], 'Coveo\\SDK\\SDKPushPHP\\PermissionIdentityExpansion')) {
+    if (!is_a($p_PermissionIdentities[0], 'Coveo\\Search\\SDK\\SDKPushPHP\\PermissionIdentityExpansion')) {
       //Error( "_add: value is not of type PermissionIdentityExpansion");
       return;
-    }
-    $attr = array_merge($attr, $p_PermissionIdentities);
+    }    $attr = array_merge($attr, $p_PermissionIdentities);
   }
 
   /**
    * Add member.
    *
-   * @param  array[PermissionIdentityExpansion]|PermissionIdentityExpansion $p_PermissionIdentities
+   * @param array[\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion]|\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion $p_PermissionIdentities
    *   List of PermissionIdentityExpansion to add.
    */
   function AddMembers($p_PermissionIdentities) {
@@ -101,8 +97,8 @@ class PermissionIdentityBody {
   /**
    * Add list of permission identities to Mappings.
    *
-   * @param array[PermissionIdentityExpansion]|PermissionIdentityExpansion $p_PermissionIdentities
-   *   List of PermissionIdentityExpansion to add.
+   * @param array[\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion]|\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion $p_PermissionIdentities
+   * List of PermissionIdentityExpansion to add.
    */
   function AddMappings($p_PermissionIdentities) {
     //Debug('AddMappings');
@@ -112,7 +108,7 @@ class PermissionIdentityBody {
   /**
    * Add list of permission identities to Well Knowns.
    *
-   * @param array[PermissionIdentityExpansion]|PermissionIdentityExpansion $p_PermissionIdentities
+   * @param array[\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion]|\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion $p_PermissionIdentities
    *   List of PermissionIdentityExpansion to add.
    */
   function AddWellKnowns($p_PermissionIdentities) {
