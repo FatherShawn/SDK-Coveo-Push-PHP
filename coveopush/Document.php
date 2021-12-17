@@ -132,10 +132,10 @@ class Document {
       $result = FALSE;
     }
     if (count($error) > 0) {
-      $this->logger->info('[Validate Document] ' . $this->DocumentId . implode(' | ', $error));
+      $this->logger->error('[Validate Document] ' . $this->DocumentId . implode(' | ', $error));
     }
     else {
-      $this->logger->info('Document ' . $this->DocumentId . ' is valid.');
+      $this->logger->debug('Document ' . $this->DocumentId . ' is valid.');
     }
     return array($result, implode(' | ', $error));
   }
