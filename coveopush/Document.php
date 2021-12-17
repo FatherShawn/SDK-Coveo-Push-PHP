@@ -264,10 +264,6 @@ class Document {
    *   (def: ZLIB), CompressionType to Use.
    */
   function SetCompressedEncodedData(string $p_CompressedEncodedData, $p_CompressionType = NULL) {
-    if ($p_CompressionType == NULL) {
-      $this->p_CompressionType = CompressionType::ZLIB;
-    }
-
     $this->logger->debug('SetCompressedEncodedData');
     // Check if empty
     if ($p_CompressedEncodedData == '') {
@@ -283,7 +279,7 @@ class Document {
 
     $this->CompressedBinaryData = $p_CompressedEncodedData;
     $this->CompressedBinaryDataFileId = '';
-    $this->CompressionType = $p_CompressionType;
+    $this->CompressionType = $p_CompressionType ??  CompressionType::ZLIB;
   }
 
   /**
@@ -405,16 +401,13 @@ class Document {
       $this->logger->error("SetAllowedAndDeniedPermissions: AllowedPermissions not set");
       return;
     }
-    if ($p_AllowAnonymous == NULL) {
-      $p_AllowAnonymous = FALSE;
-    }
     $this->logger->debug('SetAllowedAndDeniedPermissions');
     $simplePermissionLevel = new DocumentPermissionLevel('Level1');
 
     $simplePermissionSet = new DocumentPermissionSet('Set1');
     $simplePermissionSet->AddAllowedPermissions($p_AllowedPermissions);
     $simplePermissionSet->AddDeniedPermissions($p_DeniedPermissions);
-    $simplePermissionSet->AllowAnonymous = $p_AllowAnonymous;
+    $simplePermissionSet->AllowAnonymous = $p_AllowAnonymous ?? FALSE;
 
     $simplePermissionLevel->AddPermissionSet($simplePermissionSet);
 

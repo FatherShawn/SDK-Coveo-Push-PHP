@@ -41,7 +41,7 @@ class BatchPermissions {
    *
    * @param mixed $attr
    *   name of array to add the identities to (mappings, members, wellKnowns).
-   * @param array[\Coveo\SDK\SDKPushPHP\PermissionIdentityBody]|\Coveo\SDK\SDKPushPHP\PermissionIdentityBody $p_PermissionIdentityBodies
+   * @param array[\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityBody] | \Coveo\Search\SDK\SDKPushPHP\PermissionIdentityBody $p_PermissionIdentityBodies
    *   PermissionIdentityExpansion.
    */
   function __add(&$attr, $p_PermissionIdentityBodies) {
@@ -53,7 +53,7 @@ class BatchPermissions {
     if (!is_array($p_PermissionIdentityBodies)) {
       $p_PermissionIdentityBodies = array($p_PermissionIdentityBodies);
     }
-    if (!is_a($p_PermissionIdentityBodies[0], 'Coveo\\SDK\\SDKPushPHP\\PermissionIdentityBody')) {
+    if (!is_a($p_PermissionIdentityBodies[0], 'Coveo\\Search\\SDK\\SDKPushPHP\\PermissionIdentityBody')) {
       //Error( "_add: value is not of type PermissionIdentityBody");
       return;
     }
@@ -63,7 +63,7 @@ class BatchPermissions {
   /**
    * Add Members.
    *
-   * @param array[Coveo\SDK\SDKPushPHP\PermissionIdentityBody]|Coveo\SDK\SDKPushPHP\PermissionIdentityBody $p_PermissionIdentityBodies
+   * @param array[\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityBody]|\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityBody $p_PermissionIdentityBodies
    *   Permission Identity Body(s).
    */
   function AddMembers($p_PermissionIdentityBodies) {
@@ -74,7 +74,7 @@ class BatchPermissions {
   /**
    * Add Mappings.
    *
-   * @param array[\Coveo\SDK\SDKPushPHP\PermissionIdentityBody]|\Coveo\SDK\SDKPushPHP\PermissionIdentityBody $p_PermissionIdentityBodies
+   * @param array[\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityBody]|\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityBody $p_PermissionIdentityBodies
    *   Permission Identity Body(s).
    */
   function AddMappings($p_PermissionIdentityBodies) {
@@ -85,7 +85,7 @@ class BatchPermissions {
   /**
    * Add Deletes.
    *
-   * @param array[\Coveo\SDK\SDKPushPHP\PermissionIdentityBody]|\Coveo\SDK\SDKPushPHP\PermissionIdentityBody $p_PermissionIdentityBodies
+   * @param array[\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityBody]|\Coveo\Search\SDK\SDKPushPHP\PermissionIdentityBody $p_PermissionIdentityBodies
    *   Permission Identity Body(s).
    */
   function AddDeletes($p_PermissionIdentityBodies) {

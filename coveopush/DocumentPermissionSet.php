@@ -58,6 +58,7 @@ class DocumentPermissionSet {
    *   List of PermissionIdentity.
    */
   function AddAllowedPermissions($p_PermissionIdentities) {
+
     //Debug('AddAllowedPermissions');
     // Check if correct
     if ($p_PermissionIdentities == NULL || empty($p_PermissionIdentities)) {
@@ -67,7 +68,7 @@ class DocumentPermissionSet {
     if (!is_array($p_PermissionIdentities)) {
       $p_PermissionIdentities = array($p_PermissionIdentities);
     }
-    if (!is_a($p_PermissionIdentities[0], 'Coveo\\SDK\\SDKPushPHP\\PermissionIdentity')) {
+    if (!is_a($p_PermissionIdentities[0], 'Coveo\\Search\\SDK\\SDKPushPHP\\PermissionIdentity')) {
       //Error( "AddAllowedPermissions: value is not of type PermissionIdentity");
       return;
     }
@@ -77,7 +78,7 @@ class DocumentPermissionSet {
   /**
    * Add a list of PermissionIdentities to the DeniedPermissions.
    *
-   * @param array[\Coveo\SDK\SDKPushPHP\PermissionIdentity] $p_PermissionIdentities
+   * @param array[\Coveo\Search\SDK\SDKPushPHP\PermissionIdentity] $p_PermissionIdentities
    *   List of p_PermissionIdentities.
    */
   function AddDeniedPermissions($p_PermissionIdentities) {
@@ -86,11 +87,10 @@ class DocumentPermissionSet {
     if ($p_PermissionIdentities == NULL || empty($p_PermissionIdentities)) {
       return;
     }
-
     if (!is_array($p_PermissionIdentities)) {
       $p_PermissionIdentities = array($p_PermissionIdentities);
     }
-    if (!is_a($p_PermissionIdentities[0], 'Coveo\\SDK\\SDKPushPHP\\PermissionIdentity')) {
+    if (!is_a($p_PermissionIdentities[0], 'Coveo\\Search\\SDK\\SDKPushPHP\\PermissionIdentity')) {
       //Error( "AddDeniedPermissions: value is not of type PermissionIdentity");
       return;
     }

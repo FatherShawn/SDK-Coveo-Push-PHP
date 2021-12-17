@@ -48,17 +48,14 @@ class PermissionIdentity {
    *   Security Provider name.
    * @param string $p_Identity
    *   Identity to add.
-   * @param array|NULL $p_AdditionalInfo
+   * @param array|null $p_AdditionalInfo
    *   AdditionalInfo dict {} to add.
    */
   function __construct( string $p_IdentityType, string $p_SecurityProvider, string $p_Identity, array $p_AdditionalInfo = NULL) {
-    if ($p_AdditionalInfo == NULL) {
-      $p_AdditionalInfo = array();
-    }
     $this->identity = $p_Identity;
     $this->securityProvider = $p_SecurityProvider;
     $this->identityType = $p_IdentityType;
-    $this->AdditionalInfo = $p_AdditionalInfo;
+    $this->AdditionalInfo = $p_AdditionalInfo ?? array();
   }
 
 }

@@ -284,11 +284,8 @@ class Push {
    *   Values of Push source API.
    */
   function createPath($myEndpoint = NULL) {
-    if ($myEndpoint == NULL) {
-      $myEndpoint = $this->Endpoint;
-    }
     $values = array();
-    $values['endpoint'] = $myEndpoint;
+    $values['endpoint'] = $myEndpoint ?? $this->Endpoint;
     $values['org_id'] = $this->OrganizationId;
     $values['src_id'] = $this->SourceId;
     $values['prov_id'] = '';
@@ -633,11 +630,9 @@ class Push {
 
     $result = $this->doPost($this->GetStatusUrl(), $this->GetRequestHeaders(), $params);
     if ($result != FALSE) {
-      $this->logger->debug('UpdateSourceStatus, Changing status to ' . $p_SourceStatus . ' succeeded.');
       return TRUE;
     }
     else {
-      $this->logger->debug('UpdateSourceStatus, Changing status to ' . $p_SourceStatus . ' failed.');
       return FALSE;
     }
   }
@@ -653,12 +648,10 @@ class Push {
     $url = $this->GetLargeFileContainerUrl();
     $result = $this->doPost($url, $this->GetRequestHeaders(), $params);
     if ($result != FALSE) {
-      $this->logger->debug('GetLargeFileContainer ' . $url . ' succeeded.');
       $results = new LargeFileContainer($result);
       return $results;
     }
     else {
-      $this->logger->debug('GetLargeFileContainer ' . $url . ' failed.');
       return NULL;
     }
   }
@@ -710,11 +703,9 @@ class Push {
     }
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $p_CompressedFile);
     if ($result != FALSE) {
-      $this->logger->debug('UploadDocument ' . $p_UploadUri . ' succeeded.');
       return TRUE;
     }
     else {
-      $this->logger->debug('UploadDocument ' . $p_UploadUri . ' failed.');
       return FALSE;
     }
 
@@ -749,11 +740,9 @@ class Push {
     // error_log(json_encode($data));
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $this->cleanJSON($data));
     if ($result != FALSE) {
-      $this->logger->debug('UploadDocuments ' . $p_UploadUri . ' succeeded.');
       return TRUE;
     }
     else {
-      $this->logger->debug('UploadDocuments ' . $p_UploadUri . ' failed.');
       return FALSE;
     }
   }
@@ -775,13 +764,9 @@ class Push {
     $this->logger->debug("JSON: " . $permissions);
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $permissions);
     if ($result != FALSE) {
-
-      $this->logger->debug('UploadPermissions ' . $p_UploadUri . ' succeeded.');
       return TRUE;
     }
     else {
-
-      $this->logger->debug('UploadPermissions ' . $p_UploadUri . ' failed.');
       return FALSE;
     }
   }
@@ -1135,9 +1120,9 @@ class Push {
       $this->logger->debug("AddDocuments: p_CoveoDocumentsToAdd and p_CoveoDocumentsToDelete is empty");
       return;
     }
-    if ($p_UpdateStatus == NULL) {
-      $p_UpdateStatus = TRUE;
-    }
+
+    $p_UpdateStatus = $p_UpdateStatus ?? TRUE;
+
     // Update Source Status
     if ($p_UpdateStatus) {
       $this->UpdateSourceStatus(SourceStatusType::Rebuild);
@@ -1256,9 +1241,6 @@ class Push {
    */
   function End(bool $p_UpdateStatus = NULL, bool $p_DeleteOlder = NULL) {
 
-    if ($p_UpdateStatus == NULL) {
-      $p_UpdateStatus = TRUE;
-    }
 
     // $this->logger->debug('End');
     // Batch Call
@@ -1276,8 +1258,8 @@ class Push {
 
     $this->ToAdd = array();
     $this->ToDel = array();
-
     // Update Source Status
+    $p_UpdateStatus = $p_UpdateStatus ?? TRUE;
     if ($p_UpdateStatus) {
       $this->UpdateSourceStatus(SourceStatusType::Idle);
     }
@@ -1297,9 +1279,6 @@ class Push {
    * @return void
    */
   function AddSecurityProvider(string $p_SecurityProviderId, string $p_Type, array $p_CascadingTo, string $p_Endpoint = NULL) {
-    if ($p_Endpoint == NULL) {
-      $p_Endpoint = PlatformEndpoint::PROD_PLATFORM_API_URL;
-    }
     $secProvider = new SecurityProvider();
     $secProviderReference = new SecurityProviderReference($this->SourceId, "SOURCE");
     $secProvider->referencedBy = array($secProviderReference);
@@ -1313,6 +1292,7 @@ class Push {
     // make POST request to change status
     $provider = $this->cleanJSON($secProvider);
     $this->logger->debug("AddSecurityProvider JSON: " . $provider);
+    $p_Endpoint = $p_Endpoint ?? PlatformEndpoint::PROD_PLATFORM_API_URL;
     $result = $this->doPut($this->GetSecurityProviderUrl($p_Endpoint, $p_SecurityProviderId), $this->GetRequestHeaders(), $provider);
     if ($result != FALSE) {
       return TRUE;
@@ -1466,16 +1446,12 @@ class Push {
    *   (FALSE), if older documents should be removed from the index after the new push.
    */
   function EndExpansion(string $p_SecurityProviderId, bool $p_DeleteOlder = NULL) {
-    if ($p_DeleteOlder == NULL) {
-      $p_DeleteOlder = FALSE;
-    }
     $this->logger->debug('EndExpansion');
     $container = $this->GetLargeFileContainer();
     if ($container == NULL) {
       $this->logger->debug("UploadBatch: S3 container is NULL");
       return;
     }
-
     $this->UploadPermissions($container->UploadUri);
     $params = array(Parameters::FILE_ID => $container->FileId);
 
@@ -1485,10 +1461,10 @@ class Push {
 
     $result = $this->doPut($resourcePath, $this->GetRequestHeaders(), NULL, $params);
 
+    $p_DeleteOlder = $p_DeleteOlder ?? FALSE;
     if ($p_DeleteOlder) {
       $this->DeletePermissionsOlderThan($p_SecurityProviderId, $this->StartOrderingId);
     }
-
     if ($result != FALSE) {
       return TRUE;
     }
@@ -1512,7 +1488,7 @@ class Push {
 
     $values = $this->createPath();
     $values['prov_id'] = $p_SecurityProviderId;
-    $resourcePath = $this->replacePath( PushApiPaths::PROVIDER_PERMISSIONS, $values);
+    $resourcePath = $this->replacePath(PushApiPaths::PROVIDER_PERMISSIONS, $values);
     $identity = $this->cleanJSON($permissionIdentityBody);
 
     $this->logger->debug("JSON: " . $identity);
