@@ -1283,10 +1283,7 @@ class Push {
     if ($p_Mappings !== NULL) {
       $resourcePathFormat = PushApiPaths::PROVIDER_MAPPINGS;
     }
-
-    $values = $this->createPath();
-    $values['prov_id'] = $p_SecurityProviderId;
-    $resourcePath = $this->replacePath($resourcePathFormat, $values);
+    $resourcePath = $this->GetUrl($resourcePathFormat, $p_SecurityProviderId);
 
     $identity = $this->cleanJSON($permissionIdentityBody);
 
@@ -1387,9 +1384,7 @@ class Push {
     $this->UploadPermissions($container->UploadUri);
     $params = array(Parameters::FILE_ID => $container->FileId);
 
-    $values = $this->createPath();
-    $values['prov_id'] = $p_SecurityProviderId;
-    $resourcePath = $this->replacePath(PushApiPaths::PROVIDER_PERMISSIONS_BATCH, $values);
+    $resourcePath = $this->GetUrl(PushApiPaths::PROVIDER_PERMISSIONS_BATCH, $p_SecurityProviderId);
 
     $result = $this->doPut($resourcePath, $this->GetRequestHeaders(), NULL, $params);
 
@@ -1416,9 +1411,7 @@ class Push {
   function RemovePermissionIdentity(string $p_SecurityProviderId, PermissionIdentityExpansion $p_PermissionIdentity) {
     $permissionIdentityBody = new PermissionIdentityBody($p_PermissionIdentity);
 
-    $values = $this->createPath();
-    $values['prov_id'] = $p_SecurityProviderId;
-    $resourcePath = $this->replacePath(PushApiPaths::PROVIDER_PERMISSIONS, $values);
+    $resourcePath = $this->GetUrl(PushApiPaths::PROVIDER_PERMISSIONS, $p_SecurityProviderId);
     $identity = $this->cleanJSON($permissionIdentityBody);
 
     $result = $this->doDelete($resourcePath, $this->GetRequestHeaders(), NULL, $identity);
@@ -1447,9 +1440,8 @@ class Push {
 
     $params = array(Parameters::ORDERING_ID => $orderingId);
 
-    $values = $this->createPath();
-    $values['prov_id'] = $p_SecurityProviderId;
-    $resourcePath = $this->replacePath(PushApiPaths::PROVIDER_PERMISSIONS_DELETE, $values);
+    $resourcePath = $this->GetUrl(PushApiPaths::PROVIDER_PERMISSIONS_DELETE, $p_SecurityProviderId);
+
     $result = $this->doDelete($resourcePath, $this->GetRequestHeaders(), $params);
 
     if ($result !== FALSE) {
