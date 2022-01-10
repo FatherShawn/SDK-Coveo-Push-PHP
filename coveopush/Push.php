@@ -180,9 +180,7 @@ class Push {
    */
   function __construct(string $p_SourceId, string $p_OrganizationId, string $p_ApiKey, string $p_Endpoint = NULL, $logger = NULL) {
     set_time_limit(3000);
-    if ($p_Endpoint === NULL) {
-      $p_Endpoint = PushApiEndpoint::PROD_PUSH_API_URL;
-    }
+    $p_Endpoint = $p_Endpoint ?? PushApiEndpoint::PROD_PUSH_API_URL;
 
     $this->SourceId = $p_SourceId;
     $this->OrganizationId = $p_OrganizationId;
@@ -928,9 +926,9 @@ class Push {
     if (!$valid) {
       return;
     }
-
+    $updateStatus = $updateStatus ?? TRUE;
     // Update Source Status.
-    if ($updateStatus == TRUE || $updateStatus == NULL) {
+    if ($updateStatus) {
       $this->UpdateSourceStatus(SourceStatusType::Rebuild);
     }
     // Push Document.
@@ -944,7 +942,7 @@ class Push {
       $p_CoveoDocument->Content = '';
     }
     // Update Source Status.
-    if ($updateStatus == TRUE || $updateStatus == NULL) {
+    if ($updateStatus) {
       $this->UpdateSourceStatus(SourceStatusType::Idle);
     }
   }
