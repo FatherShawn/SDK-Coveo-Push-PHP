@@ -225,9 +225,10 @@ class Push {
   function SetSizeMaxRequest(int $p_Max) {
     if ($p_Max > Constants::MAXIMUM_REQUEST_SIZE_IN_BYTES) {
       $this->logger->error("SetSizeMaxRequest: to big");
-      return;
+      return FALSE;
     }
     $this->MaxRequestSize = $p_Max;
+    return TRUE;
   }
 
   /**
@@ -678,11 +679,11 @@ class Push {
 
     if ($p_UploadUri === NULL) {
       $this->logger->error("UploadDocument: p_UploadUri is not present");
-      return;
+      return FALSE;
     }
     if ($p_CompressedFile === NULL) {
       $this->logger->error("UploadDocument: p_CompressedFile is not present");
-      return;
+      return FALSE;
     }
 
     // Check if p_CompressedFile is base64 encoded, if so, decode it first.
@@ -715,17 +716,17 @@ class Push {
   function UploadDocuments(string $p_UploadUri, array $p_ToAdd, array $p_ToDelete) {
     if ($p_UploadUri === NULL) {
       $this->logger->error("UploadDocument: p_UploadUri is not present");
-      return;
+      return FALSE;
     }
     if ($p_ToAdd === NULL && $p_ToDelete === NULL) {
       $this->logger->error("UploadBatch: p_ToAdd and p_ToDelete are empty");
-      return;
+      return FALSE;
     }
 
     $data = new BatchDocument();
     $data->AddOrUpdate = $p_ToAdd;
     $data->Delete = $p_ToDelete;
-    // error_log(json_encode($data));
+
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $this->cleanJSON($data));
     if ($result !== FALSE) {
       return TRUE;
@@ -740,12 +741,13 @@ class Push {
    *
    * @param string $p_UploadUri
    *   Retrieved from the GetLargeFileContainer call.
-   * @return void
+   *
+   * @return bool
    */
   function UploadPermissions(string $p_UploadUri) {
     if ($p_UploadUri === NULL) {
       $this->logger->error("UploadPermissions: p_UploadUri is not present");
-      return;
+      return FALSE;
     }
 
     $permissions = $this->cleanJSON($this->BatchPermissions);
@@ -820,7 +822,7 @@ class Push {
     if ($orderingId !== NULL) {
       $params[Parameters::ORDERING_ID] = $orderingId;
     }
-    // Set the compression type parameter
+    // Set the compression type parameter.
     if ($p_CoveoDocument->CompressedBinaryData != '' || $p_CoveoDocument->CompressedBinaryDataFileId != '') {
       $params[Parameters::COMPRESSION_TYPE] = $p_CoveoDocument->CompressionType;
     }
@@ -884,14 +886,14 @@ class Push {
      // Validate
     if ($orderingId <= 0) {
       $this->logger->error("DeleteOlderThan: orderingId must be a positive 64 bit float.");
-      return;
+      return FALSE;
     }
     $params = array( Parameters::ORDERING_ID => $orderingId);
 
     if ($queueDelay !== NULL) {
       if (!($queueDelay >= 0 && $queueDelay <= 1440)) {
         $this->logger->error("DeleteOlderThan: queueDelay must be between 0 and 1440.");
-        return;
+        return FALSE;
       }
       else {
         $params[Parameters::QUEUE_DELAY] = $queueDelay;
@@ -924,7 +926,7 @@ class Push {
     // First check.
     list($valid, $error) = $p_CoveoDocument->Validate();
     if (!$valid) {
-      return;
+      return FALSE;
     }
     $updateStatus = $updateStatus ?? TRUE;
     // Update Source Status.
@@ -963,17 +965,20 @@ class Push {
     // Single Call
     // Update Source Status.
     $updateStatus = $updateStatus ?? TRUE;
+    $is_source_updated = TRUE;
     if ($updateStatus) {
-      $this->UpdateSourceStatus(SourceStatusType::Rebuild);
+      $is_source_updated = $this->UpdateSourceStatus(SourceStatusType::Rebuild);
     }
 
     // Delete document.
-    $this->DeleteDocument($p_DocumentId, $orderingId, $deleteChildren);
+    $is_document_delete = TRUE;
+    $is_document_delete = $this->DeleteDocument($p_DocumentId, $orderingId, $deleteChildren);
 
     // Update Source Status.
     if ($updateStatus) {
-      $this->UpdateSourceStatus(SourceStatusType::Idle);
+      $is_source_updated = $is_source_updated && $this->UpdateSourceStatus(SourceStatusType::Idle);
     }
+    return $is_document_delete && $is_source_updated;
   }
 
   /**
@@ -983,10 +988,11 @@ class Push {
    *   File Id retrieved from GetLargeFileContainer call.
    *
    * @return bool
+   *   Return TRUE or FALSE if request succeeded.
    */
   function AddUpdateDocumentsRequest(string $p_FileId) {
     $params = array(Parameters::FILE_ID => $p_FileId);
-    // make POST request to change status
+    // make PUT request to change status.
     $result = $this->doPut($this->GetUpdateDocumentsUrl(), $this->GetRequestHeaders(), NULL, $params);
     if ($result !== FALSE) {
       return TRUE;
@@ -997,7 +1003,7 @@ class Push {
   }
 
   /**
-   *  Uploads the batch to S3 and calls the Push API to record the fileId
+   * Uploads the batch to S3 and calls the Push API to record the fileId.
    *
    * @param array $p_ToAdd
    *   list of CoveoDocuments to add.
@@ -1008,15 +1014,20 @@ class Push {
   function UploadBatch(array $p_ToAdd, array $p_ToDelete) {
     if ($p_ToAdd === NULL && $p_ToDelete === NULL) {
       $this->logger->error("UploadBatch: p_ToAdd and p_ToDelete are empty");
-      return;
+      return FALSE;
     }
     $container = $this->GetLargeFileContainer();
-    if ($container == NULL) {
+    if ($container === NULL) {
       $this->logger->error("UploadBatch: S3 container is NULL");
-      return;
+      return FALSE;
     }
-    $this->UploadDocuments($container->UploadUri, $p_ToAdd, $p_ToDelete);
-    $this->AddUpdateDocumentsRequest($container->FileId);
+    $result = TRUE;
+
+    $result = $this->UploadDocuments($container->UploadUri, $p_ToAdd, $p_ToDelete);
+
+    $result = $result && $this->AddUpdateDocumentsRequest($container->FileId);
+
+    return $result;
   }
 
   /**
@@ -1037,11 +1048,11 @@ class Push {
       $documentSize = strlen($document->ToJson()) + 1;
 
       $totalSize += $documentSize;
-      $this->logger->debug("Doc: " . $document->DocumentId . " Currentsize: " . $totalSize . " vs max: " . $size_max_req);
+      $this->logger->debug("Document: " . $document->DocumentId . " Currentsize: " . $totalSize . " vs max: " . $size_max_req);
 
       if ($documentSize > $size_max_req) {
-        $this->logger->error("No document can be larger than " . $size_max_req . " bytes in size.");
-        return;
+        $this->logger->error("Document: " . $document->DocumentId . " can\'t be larger than " . $size_max_req . " bytes in size.");
+        return FALSE;
       }
 
       if ($totalSize > $size_max_req - (count($currentBatchToAddUpdate) + count($currentBatchToDelete))) {
@@ -1066,7 +1077,7 @@ class Push {
       }
     }
 
-    $this->UploadBatch($currentBatchToAddUpdate, $currentBatchToDelete);
+    return $this->UploadBatch($currentBatchToAddUpdate, $currentBatchToDelete);
   }
 
   /**
@@ -1081,19 +1092,19 @@ class Push {
    * @param bool|null $p_DeleteOlder
    *   (FALSE), if older documents should be removed from the index after the new push.
    *
-   * @return void
+   * @return bool
    */
   function AddDocuments(array $p_CoveoDocumentsToAdd, array $p_CoveoDocumentsToDelete, bool $p_UpdateStatus = NULL, bool $p_DeleteOlder = NULL) {
-    if ($p_CoveoDocumentsToAdd == NULL && $p_CoveoDocumentsToDelete == NULL) {
+    if ($p_CoveoDocumentsToAdd === NULL && $p_CoveoDocumentsToDelete === NULL) {
       $this->logger->error("AddDocuments: p_CoveoDocumentsToAdd and p_CoveoDocumentsToDelete is empty");
-      return;
+      return FALSE;
     }
 
     $p_UpdateStatus = $p_UpdateStatus ?? TRUE;
-
+    $is_source_updated = TRUE;
     // Update Source Status
     if ($p_UpdateStatus) {
-      $this->UpdateSourceStatus(SourceStatusType::Rebuild);
+      $is_source_updated = $this->UpdateSourceStatus(SourceStatusType::Rebuild);
     }
 
     // Push the Documents
@@ -1105,24 +1116,23 @@ class Push {
       $allDocuments = array_merge($allDocuments, $p_CoveoDocumentsToDelete);
     }
 
-    $this->ProcessAndUploadBatch($allDocuments);
+    $batch_uploaded = $this->ProcessAndUploadBatch($allDocuments);
+    $p_DeleteOlder = $p_DeleteOlder ?? FALSE;
 
-    if ($p_DeleteOlder == NULL) {
-      $p_DeleteOlder = FALSE;
-    }
-
-    // Delete Older Documents
+    $is_deleted = TRUE;
+    // Delete Older Documents.
     if ($p_DeleteOlder) {
       // Batch Call
       // First check
       $startOrderingId = $this->CreateOrderingId();
-      $this->DeleteOlderThan($startOrderingId);
+      $is_deleted = $this->DeleteOlderThan($startOrderingId);
     }
 
-    // Update Source Status
+    // Update Source Status.
     if ($p_UpdateStatus) {
-      $this->UpdateSourceStatus(SourceStatusType::Idle);
+      $is_source_updated = $is_source_updated && $this->UpdateSourceStatus(SourceStatusType::Idle);
     }
+    return $is_source_updated && $batch_uploaded && $is_deleted;
   }
 
   /**
@@ -1130,19 +1140,22 @@ class Push {
    *
    * @param bool|null $p_UpdateStatus
    *   (True), if the source status should be updated.
-   * @param bool|null $p_DeleteOlder
-   *   (FALSE), if older documents should be removed from the index after the new push.
+   *
+   * @return bool
+   *   True if Push source status is set to Rebuild and ordering id is created.
    */
-  function Start(bool $p_UpdateStatus = NULL, bool $p_DeleteOlder = NULL) {
+  function Start(bool $p_UpdateStatus = NULL) {
     $p_UpdateStatus = $p_UpdateStatus ?? TRUE;
     // Batch Call
-    // First check
+    // First check.
     $this->StartOrderingId = $this->CreateOrderingId();
-
-    // Update Source Status
+    $is_ordering_id_valid = $this->StartOrderingId > 0;
+    $is_source_updated = TRUE;
+    // Update Source Status.
     if ($p_UpdateStatus) {
-      $this->UpdateSourceStatus(SourceStatusType::Rebuild);
+      $is_source_updated = $this->UpdateSourceStatus(SourceStatusType::Rebuild);
     }
+    return $is_ordering_id_valid && $is_source_updated;
   }
 
   /**
@@ -1150,30 +1163,38 @@ class Push {
    *
    * @param \Coveo\Search\SDK\SDKPushPHP\Document $p_CoveoDocument
    *   Coveo Document of CoveoDocumentToDelete.
+   *
+   * @return bool
+   *   Return true/false if document nwas added to the batch or uploaded if current batch size exceeds max batch size.
    */
   function Add($p_CoveoDocument) {
     if ($p_CoveoDocument == NULL) {
       $this->logger->error("Add: p_CoveoDocument is empty");
-      return;
+      return FALSE;
     }
 
     $documentSize = strlen($p_CoveoDocument->ToJson()) + 1;
     $size_max_req = $this->GetSizeMaxRequest();
     $this->totalSize += $documentSize;
-    $this->logger->debug("Doc: " . $p_CoveoDocument->DocumentId . "Currentsize: " . $this->totalSize . " vs max: " . $size_max_req);
 
     if ($documentSize > $size_max_req) {
-      $this->logger->error("No document can be larger than " . $size_max_req . " bytes in size.");
-      return;
+      $this->logger->error("Document: " . $p_CoveoDocument->DocumentId . " can\'t be larger than " . $size_max_req . " bytes in size.");
+      return FALSE;
+    }
+    else {
+      $this->logger->debug("Document: " . $p_CoveoDocument->DocumentId . " Currentsize: " . $this->totalSize . " vs max: " . $size_max_req);
     }
 
     if ($this->totalSize > $size_max_req - (count($this->ToAdd) + count($this->ToDel))) {
+      $this->logger->debug("Uploading the batch because it exceeded the max size.");
+      // upload batch.
       $this->UploadBatch($this->ToAdd, $this->ToDel);
+      // reset current document stacks and total size.
       $this->ToAdd = array();
       $this->ToDel = array();
       $this->totalSize = $documentSize;
     }
-
+    // add document to delete/add stack.
     if (is_a($p_CoveoDocument, 'Coveo\\SDK\\SDKPushPHP\\DocumentToDelete')) {
       array_push($this->ToDel, $p_CoveoDocument->cleanUp()); //->ToJson());
     }
@@ -1181,12 +1202,13 @@ class Push {
       // Validate each document.
       list($valid, $error) = $p_CoveoDocument->Validate();
       if (!$valid) {
-        return;
+        return FALSE;
       }
       else {
         array_push($this->ToAdd, $p_CoveoDocument->cleanUp()); //->ToJson());
       }
     }
+    return TRUE;
   }
 
   /**
@@ -1198,22 +1220,25 @@ class Push {
    *   (FALSE), if older documents should be removed from the index after the new push.
    */
   function End(bool $p_UpdateStatus = NULL, bool $p_DeleteOlder = NULL) {
-    // Batch Call
-    $this->UploadBatch($this->ToAdd, $this->ToDel);
+    // Batch Call.
 
+    $is_batch_uploaded = $this->UploadBatch($this->ToAdd, $this->ToDel);
     $p_DeleteOlder = $p_DeleteOlder ?? FALSE;
+    $is_deleted = TRUE;
     if ($p_DeleteOlder) {
-      // Delete Older Documents
-      $this->DeleteOlderThan($this->StartOrderingId);
+      // Delete Older Documents.
+      $is_deleted = $this->DeleteOlderThan($this->StartOrderingId);
     }
 
     $this->ToAdd = array();
     $this->ToDel = array();
-    // Update Source Status
+    // Update Source Status.
     $p_UpdateStatus = $p_UpdateStatus ?? TRUE;
+    $is_source_updated = TRUE;
     if ($p_UpdateStatus) {
-      $this->UpdateSourceStatus(SourceStatusType::Idle);
+      $is_source_updated = $this->UpdateSourceStatus(SourceStatusType::Idle);
     }
+    return $is_batch_uploaded &&  $is_deleted && $is_source_updated;
   }
 
   /**
@@ -1224,10 +1249,12 @@ class Push {
    * @param string $p_Type
    *   Type of provider, normally 'EXPANDED'.
    * @param array $p_CascadingTo
-   *   dictionary.
+   *   Cascading To.
    * @param string $p_Endpoint
    *   Constants.PlatformEndpoint.
-   * @return void
+   *
+   * @return bool
+   *   True if request to add security providere succeeded.
    */
   function AddSecurityProvider(string $p_SecurityProviderId, string $p_Type, array $p_CascadingTo, string $p_Endpoint = NULL) {
     $secProvider = new SecurityProvider();
@@ -1238,7 +1265,7 @@ class Push {
     $secProvider->nodeRequired = FALSE;
     $secProvider->cascadingSecurityProviders = $p_CascadingTo;
 
-    // make POST request to change status
+    // make PUT request to change status.
     $provider = $this->cleanJSON($secProvider);
     $p_Endpoint = $p_Endpoint ?? PlatformEndpoint::PROD_PLATFORM_API_URL;
     $result = $this->doPut($this->GetSecurityProviderUrl($p_Endpoint, $p_SecurityProviderId), $this->GetRequestHeaders(), $provider);
@@ -1248,7 +1275,6 @@ class Push {
     else {
       return FALSE;
     }
-
   }
 
   /**
@@ -1342,7 +1368,7 @@ class Push {
    * @param array $p_WellKnowns
    *   list of PermissionIdentityExpansion.
    */
-   function AddExpansionMapping(PermissionIdentityExpansion $p_Identity, array $p_Members, array $p_Mappings, array $p_WellKnowns) {
+  function AddExpansionMapping(PermissionIdentityExpansion $p_Identity, array $p_Members, array $p_Mappings, array $p_WellKnowns) {
     $permissionIdentityBody = new PermissionIdentityBody($p_Identity);
     $permissionIdentityBody->AddMembers($p_Members);
     $permissionIdentityBody->AddMappings($p_Mappings);
@@ -1438,7 +1464,7 @@ class Push {
   function DeletePermissionsOlderThan(string $p_SecurityProviderId, int $orderingId = NULL) {
     if ($orderingId <= 0) {
       $this->logger->error("DeletePermissionsOlderThan: orderingId must be a positive 64 bit integer.");
-      return;
+      return FALSE;
     }
 
     $params = array(Parameters::ORDERING_ID => $orderingId);
