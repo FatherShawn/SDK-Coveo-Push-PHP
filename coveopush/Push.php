@@ -325,10 +325,10 @@ class Push {
   }
 
   /**
-   * Create an Ordering Id, used to set the order of the pushed items
+   * Create an Ordering Id, used to set the order of the pushed items.
    *
-   * @return string
-   *   The OrderingId.
+   * @return float
+   *   The batch ordering Id.
    */
   function CreateOrderingId() {
     $ordering_id = round((microtime(true) * 1000), 0);
@@ -439,6 +439,8 @@ class Push {
    *
    * @return string
    *   The status code value.
+   *
+   * @see https://docs.coveo.com/en/95/index-content/troubleshooting-push-api-error-codes
    */
   function CheckReturnCode($p_Response) {
     $this->logger->debug($p_Response['status_code']);
@@ -566,7 +568,7 @@ class Push {
    *   Request headers.
    * @param object|array $params
    *   Request parameters.
-   * @param [type] $data
+   * @param mixed $data
    *   Request data.
    *
    * @return mixed
@@ -836,19 +838,19 @@ class Push {
     }
   }
 
- /**
-  * Deletes the document.
-  *
-  * @param string $p_DocumentId
-  *   Coveo Document id.
-  * @param int|null $orderingId
-  *   Ordering Id.
-  * @param bool|null $deleteChildren
-  *   If children must be deleted.
-  *
-  * @return bool
-  *   True if the docuemnt is deleted. false if delete document request failed.
-  */
+  /**
+   * Deletes the document.
+   *
+   * @param string $p_DocumentId
+   *   Coveo Document id.
+   * @param int|null $orderingId
+   *   Ordering Id.
+   * @param bool|null $deleteChildren
+   *   If children must be deleted.
+   *
+   * @return bool
+   *   True if the docuemnt is deleted. false if delete document request failed.
+   */
   function DeleteDocument(string $p_DocumentId, int $orderingId = NULL, bool $deleteChildren = NULL) {
     $params = array(Parameters::DOCUMENT_ID => $p_DocumentId);
 
@@ -910,7 +912,7 @@ class Push {
   }
 
   /**
-   * Pushes the Document to the Push API
+   * Pushes the Document to the Push API.
    *
    * @param \Coveo\Search\SDK\SDKPushPHP\Document $p_CoveoDocument
    *   Coveo Document.
@@ -1266,6 +1268,9 @@ class Push {
    *   list of PermissionIdentityExpansion.
    * @param int|null $orderingId
    *   ordering Id.
+   *
+   * @return bool
+   *   True if request to expand permissions succeeded.
    */
   function AddPermissionExpansion(string $p_SecurityProviderId, PermissionIdentityExpansion $p_Identity, array $p_Members, array $p_Mappings, array $p_WellKnowns, int $orderingId = NULL) {
     $permissionIdentityBody = new PermissionIdentityBody($p_Identity);
@@ -1330,7 +1335,7 @@ class Push {
    * For example: Identity WIM has 3 mappings: wim@coveo.com, w@coveo.com, ad\\w
    * Add a single Permission Expansion (PermissionIdentityBody) to the Mappings
    *
-   * @param PermissionIdentityExpansion $p_Identity
+   * @param \Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion $p_Identity
    *   PermissionIdentityExpansion, must be the same as Identity in PermissionIdentity when pushing documents.
    * @param array $p_Members
    *   list of PermissionIdentityExpansion.
@@ -1348,9 +1353,9 @@ class Push {
   }
 
   /**
-   *  AddExpansionDeleted.Add a single Permission Expansion (PermissionIdentityBody) to the Deleted, will be deleted from the security cache
+   * Add a single Permission Expansion (PermissionIdentityBody) to the Deleted, will be deleted from the security cache.
    *
-   * @param PermissionIdentityExpansion $p_Identity
+   * @param \Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion $p_Identity
    *   PermissionIdentityExpansion, must be the same as Identity in PermissionIdentity when pushing documents.
    * @param array $p_Members
    *   list of PermissionIdentityExpansion.
@@ -1368,11 +1373,11 @@ class Push {
   }
 
   /**
-   *  EndExpansion will write the last batch of security updates to the push api
+   * Write the last batch of security updates to the push api.
    *
    * @param string $p_SecurityProviderId
    *   Security Provider to use.
-   * @param [type] $p_DeleteOlder
+   * @param bool|null $p_DeleteOlder
    *   (FALSE), if older documents should be removed from the index after the new push.
    */
   function EndExpansion(string $p_SecurityProviderId, bool $p_DeleteOlder = NULL) {
@@ -1405,7 +1410,7 @@ class Push {
    *
    * @param string $p_SecurityProviderId
    *   Security Provider to use.
-   * @param PermissionIdentityExpansion $p_PermissionIdentity
+   * @param \Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion $p_PermissionIdentity
    *   PermissionIdentityExpansion, permissionIdentity to remove.
    */
   function RemovePermissionIdentity(string $p_SecurityProviderId, PermissionIdentityExpansion $p_PermissionIdentity) {

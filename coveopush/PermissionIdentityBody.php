@@ -46,7 +46,7 @@ class PermissionIdentityBody {
   /**
    * Default constructor used by the deserialization.
    *
-   * @param PermissionIdentityExpansion $p_Identity
+   * @param Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion $p_Identity
    *   Identity name.
    */
   function __construct(PermissionIdentityExpansion $p_Identity) {
