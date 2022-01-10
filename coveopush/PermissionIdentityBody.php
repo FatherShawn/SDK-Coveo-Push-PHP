@@ -71,7 +71,7 @@ class PermissionIdentityBody {
    */
   function __add(&$attr, $p_PermissionIdentities) {
     // Check if correct
-    if ($p_PermissionIdentities == NULL || empty($p_PermissionIdentities)) {
+    if ($p_PermissionIdentities === NULL || empty($p_PermissionIdentities)) {
       return;
     }
     if (!is_array($p_PermissionIdentities)) {

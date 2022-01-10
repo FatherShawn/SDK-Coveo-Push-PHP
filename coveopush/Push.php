@@ -180,7 +180,7 @@ class Push {
    */
   function __construct(string $p_SourceId, string $p_OrganizationId, string $p_ApiKey, string $p_Endpoint = NULL, $logger = NULL) {
     set_time_limit(3000);
-    if ($p_Endpoint == NULL) {
+    if ($p_Endpoint === NULL) {
       $p_Endpoint = PushApiEndpoint::PROD_PUSH_API_URL;
     }
 
@@ -636,7 +636,7 @@ class Push {
     $params = array();
     $url = $this->GetLargeFileContainerUrl();
     $result = $this->doPost($url, $this->GetRequestHeaders(), $params);
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       $results = new LargeFileContainer($result);
       return $results;
     }
@@ -676,11 +676,11 @@ class Push {
    */
   function UploadDocument(string $p_UploadUri, string $p_CompressedFile) {
 
-    if ($p_UploadUri == NULL) {
+    if ($p_UploadUri === NULL) {
       $this->logger->error("UploadDocument: p_UploadUri is not present");
       return;
     }
-    if ($p_CompressedFile == NULL) {
+    if ($p_CompressedFile === NULL) {
       $this->logger->error("UploadDocument: p_CompressedFile is not present");
       return;
     }
@@ -690,7 +690,7 @@ class Push {
       $p_CompressedFile = base64_decode($p_CompressedFile);
     }
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $p_CompressedFile);
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {
@@ -713,11 +713,11 @@ class Push {
    *   True if document was uploaded, false if not.
    */
   function UploadDocuments(string $p_UploadUri, array $p_ToAdd, array $p_ToDelete) {
-    if ($p_UploadUri == NULL) {
+    if ($p_UploadUri === NULL) {
       $this->logger->error("UploadDocument: p_UploadUri is not present");
       return;
     }
-    if ($p_ToAdd == NULL && $p_ToDelete == NULL) {
+    if ($p_ToAdd === NULL && $p_ToDelete === NULL) {
       $this->logger->error("UploadBatch: p_ToAdd and p_ToDelete are empty");
       return;
     }
@@ -727,7 +727,7 @@ class Push {
     $data->Delete = $p_ToDelete;
     // error_log(json_encode($data));
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $this->cleanJSON($data));
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {
@@ -743,14 +743,14 @@ class Push {
    * @return void
    */
   function UploadPermissions(string $p_UploadUri) {
-    if ($p_UploadUri == NULL) {
+    if ($p_UploadUri === NULL) {
       $this->logger->error("UploadPermissions: p_UploadUri is not present");
       return;
     }
 
     $permissions = $this->cleanJSON($this->BatchPermissions);
     $result = $this->doPut($p_UploadUri, $this->GetRequestHeadersForS3(), $permissions);
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {
@@ -769,7 +769,7 @@ class Push {
    */
   function GetContainerAndUploadDocument(string $p_Content) {
     $container = $this->GetLargeFileContainer();
-    if ($container == NULL) {
+    if ($container === NULL) {
       $this->logger->error("GetContainerAndUploadDocument: S3 container is null");
       return;
     }
@@ -817,7 +817,7 @@ class Push {
   function AddUpdateDocumentRequest(Document $p_CoveoDocument, int $orderingId = NULL) {
     $params = array(Parameters::DOCUMENT_ID => $p_CoveoDocument->DocumentId);
 
-    if ($orderingId != NULL) {
+    if ($orderingId !== NULL) {
       $params[Parameters::ORDERING_ID] = $orderingId;
     }
     // Set the compression type parameter
@@ -828,7 +828,7 @@ class Push {
     $body = json_encode($p_CoveoDocument->cleanUp());
     // self.logger.debug(body)
     $result = $this->doPut($this->GetUpdateDocumentUrl(), $this->GetRequestHeaders(), $body, $params);
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {
@@ -852,16 +852,16 @@ class Push {
   function DeleteDocument(string $p_DocumentId, int $orderingId = NULL, bool $deleteChildren = NULL) {
     $params = array(Parameters::DOCUMENT_ID => $p_DocumentId);
 
-    if ($orderingId != NULL) {
+    if ($orderingId !== NULL) {
       $params[Parameters::ORDERING_ID] = $orderingId;
     }
     $deleteChildren = $deleteChildren ?? FALSE;
-    if ($deleteChildren == TRUE) {
+    if ($deleteChildren === TRUE) {
       $params[Parameters::DELETE_CHILDREN] = "true";
     }
 
     $result = $this->doDelete($this->GetDeleteDocumentUrl(), $this->GetRequestHeaders(), $params);
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {
@@ -888,7 +888,7 @@ class Push {
     }
     $params = array( Parameters::ORDERING_ID => $orderingId);
 
-    if ($queueDelay != NULL) {
+    if ($queueDelay !== NULL) {
       if (!($queueDelay >= 0 && $queueDelay <= 1440)) {
         $this->logger->error("DeleteOlderThan: queueDelay must be between 0 and 1440.");
         return;
@@ -901,7 +901,7 @@ class Push {
       $params[Parameters::QUEUE_DELAY] = 0;
     }
     $result = $this->doDelete($this->GetDeleteOlderThanUrl(), $this->GetRequestHeaders(), $params);
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {
@@ -933,7 +933,7 @@ class Push {
     }
     // Push Document.
     try {
-      if ($p_CoveoDocument->CompressedBinaryData != '' || $p_CoveoDocument->Data != '') {
+      if ($p_CoveoDocument->CompressedBinaryData !== '' || $p_CoveoDocument->Data !== '') {
         $this->UploadDocumentIfTooLarge($p_CoveoDocument);
       }
       $this->AddUpdateDocumentRequest($p_CoveoDocument, $orderingId);
@@ -988,7 +988,7 @@ class Push {
     $params = array(Parameters::FILE_ID => $p_FileId);
     // make POST request to change status
     $result = $this->doPut($this->GetUpdateDocumentsUrl(), $this->GetRequestHeaders(), NULL, $params);
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {
@@ -1006,7 +1006,7 @@ class Push {
    *
    */
   function UploadBatch(array $p_ToAdd, array $p_ToDelete) {
-    if ($p_ToAdd == NULL && $p_ToDelete == NULL) {
+    if ($p_ToAdd === NULL && $p_ToDelete === NULL) {
       $this->logger->error("UploadBatch: p_ToAdd and p_ToDelete are empty");
       return;
     }
@@ -1057,7 +1057,7 @@ class Push {
       else {
         // Validate each document
         list($valid, $error) = $document->Validate();
-        if ($valid == FALSE) {
+        if ($valid === FALSE) {
           return;
         }
         else {
@@ -1242,7 +1242,7 @@ class Push {
     $provider = $this->cleanJSON($secProvider);
     $p_Endpoint = $p_Endpoint ?? PlatformEndpoint::PROD_PLATFORM_API_URL;
     $result = $this->doPut($this->GetSecurityProviderUrl($p_Endpoint, $p_SecurityProviderId), $this->GetRequestHeaders(), $provider);
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {
@@ -1275,12 +1275,12 @@ class Push {
 
     $params = array();
 
-    if ($orderingId != NULL) {
+    if ($orderingId !== NULL && $orderingId > 0 ) {
       $params[Parameters::ORDERING_ID] = $orderingId;
     }
 
     $resourcePathFormat = PushApiPaths::PROVIDER_PERMISSIONS;
-    if ($p_Mappings != NULL) {
+    if ($p_Mappings !== NULL) {
       $resourcePathFormat = PushApiPaths::PROVIDER_MAPPINGS;
     }
 
@@ -1291,7 +1291,7 @@ class Push {
     $identity = $this->cleanJSON($permissionIdentityBody);
 
     $result = $this->doPut($resourcePath, $this->GetRequestHeaders(), $identity, $params);
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {
@@ -1397,7 +1397,7 @@ class Push {
     if ($p_DeleteOlder) {
       $this->DeletePermissionsOlderThan($p_SecurityProviderId, $this->StartOrderingId);
     }
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {
@@ -1423,7 +1423,7 @@ class Push {
 
     $result = $this->doDelete($resourcePath, $this->GetRequestHeaders(), NULL, $identity);
 
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {
@@ -1452,7 +1452,7 @@ class Push {
     $resourcePath = $this->replacePath(PushApiPaths::PROVIDER_PERMISSIONS_DELETE, $values);
     $result = $this->doDelete($resourcePath, $this->GetRequestHeaders(), $params);
 
-    if ($result != FALSE) {
+    if ($result !== FALSE) {
       return TRUE;
     }
     else {

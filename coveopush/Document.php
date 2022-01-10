@@ -85,7 +85,7 @@ class Document {
    */
   function isBase64($s) {
     try {
-      return base64_encode(base64_decode($s)) == $s;
+      return base64_encode(base64_decode($s)) === $s;
     }
     catch (Exception $e) {
       return FALSE;
@@ -100,11 +100,11 @@ class Document {
   function Validate() {
     $result = TRUE;
     $error = array();
-    if ($this->permanentid == '') {
+    if ($this->permanentid === '') {
       array_push($error, 'permanentid is empty');
       $result = FALSE;
     }
-    if ($this->DocumentId == '') {
+    if ($this->DocumentId === '') {
       array_push($error, 'DocumentId is empty');
       $result = FALSE;
     }
@@ -167,7 +167,7 @@ class Document {
           }
         }
         else {
-          if ($this->{$attr} != "") {
+          if ($this->{$attr} !== "") {
             $all[$attr] = $this->{$attr};
           }
         }
@@ -206,7 +206,7 @@ class Document {
   function SetData(string $p_Data) {
     //Debug('SetData');
     // Check if empty
-    if ($p_Data == '') {
+    if ($p_Data === '') {
       $this->logger->error('[Setdata] : value not set');
       return;
     }
@@ -289,7 +289,7 @@ class Document {
   function SetContentAndZLibCompress(string $p_Content) {
     // $this->logger->debug('SetContentAndZLibCompress');
     // Check if empty
-    if ($p_Content == '') {
+    if ($p_Content === '') {
       $this->logger->error("SetContentAndZLibCompress: value not set");
       return;
     }
@@ -309,7 +309,7 @@ class Document {
    */
   function GetFileAndCompress(string $p_FilePath) {
     // Check if empty
-    if ($p_FilePath == '') {
+    if ($p_FilePath === '') {
       $this->logger->error("GetFileAndCompress: file path value not set");
       return;
     }
@@ -336,8 +336,8 @@ class Document {
    *   The fileId retrieved by the GetLargeFileContainer call.
    */
   function SetCompressedDataFileId(string $p_CompressedDataFileId) {
-    // Check if empty
-    if ($p_CompressedDataFileId == '') {
+    // Check if empty.
+    if ($p_CompressedDataFileId === '') {
       $this->logger->error("SetCompressedDataFileId: value not set");
       return;
     }
@@ -357,21 +357,21 @@ class Document {
    */
   function AddMetadata(string $p_Key, $p_Value) {
     //Debug($p_Key . ": " . mb_convert_encoding(utf8_encode($p_Value), "UTF-8", "ASCII"));
-    // Check if empty
-    if ($p_Key == '') {
+    // Check if empty.
+    if ($p_Key === '') {
       $this->logger->error("AddMetadata: key not set");
       return;
     }
 
-    // Check if in reserved keys
+    // Check if in reserved keys.
     $lower = strtolower($p_Key);
     if (array_key_exists($lower, Constants::S_DOCUMENT_RESERVED_KEYS)) {
       $this->logger->error("AddMetadata: " . $p_Key . " is a reserved field and cannot be set as metadata.");
       return;
     }
 
-    // Check if empty
-    if ($p_Value == '' || $p_Value == NULL) {
+    // Check if empty.
+    if ($p_Value === '' || $p_Value === NULL) {
       $this->logger->debug("AddMetadata: value not set for metadata key " . $p_Key);
       return;
     }
@@ -393,7 +393,7 @@ class Document {
    */
   function SetAllowedAndDeniedPermissions(array $p_AllowedPermissions, array $p_DeniedPermissions, bool $p_AllowAnonymous = NULL) {
     // Check if empty
-    if ($p_AllowedPermissions == NULL) {
+    if ($p_AllowedPermissions === NULL) {
       $this->logger->error("SetAllowedAndDeniedPermissions: AllowedPermissions not set");
       return;
     }

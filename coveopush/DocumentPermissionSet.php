@@ -61,7 +61,7 @@ class DocumentPermissionSet {
 
     //Debug('AddAllowedPermissions');
     // Check if correct
-    if ($p_PermissionIdentities == NULL || empty($p_PermissionIdentities)) {
+    if ($p_PermissionIdentities === NULL || empty($p_PermissionIdentities)) {
       return;
     }
 
@@ -84,7 +84,7 @@ class DocumentPermissionSet {
   function AddDeniedPermissions($p_PermissionIdentities) {
     //Debug('AddDeniedPermissions');
     // Check if correct
-    if ($p_PermissionIdentities == NULL || empty($p_PermissionIdentities)) {
+    if ($p_PermissionIdentities === NULL || empty($p_PermissionIdentities)) {
       return;
     }
     if (!is_array($p_PermissionIdentities)) {
