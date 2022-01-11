@@ -46,7 +46,7 @@ class PermissionIdentityBody {
   /**
    * Default constructor used by the deserialization.
    *
-   * @param PermissionIdentityExpansion $p_Identity
+   * @param Coveo\Search\SDK\SDKPushPHP\PermissionIdentityExpansion $p_Identity
    *   Identity name.
    */
   function __construct(PermissionIdentityExpansion $p_Identity) {
@@ -71,7 +71,7 @@ class PermissionIdentityBody {
    */
   function __add(&$attr, $p_PermissionIdentities) {
     // Check if correct
-    if ($p_PermissionIdentities == NULL || empty($p_PermissionIdentities)) {
+    if ($p_PermissionIdentities === NULL || empty($p_PermissionIdentities)) {
       return;
     }
     if (!is_array($p_PermissionIdentities)) {

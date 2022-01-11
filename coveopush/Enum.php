@@ -44,7 +44,7 @@ abstract class Enum {
    * @return array
    */
   private static function getConstants() {
-    if (self::$constCacheArray == NULL) {
+    if (self::$constCacheArray === NULL) {
       self::$constCacheArray = [];
     }
     $calledClass = get_called_class();

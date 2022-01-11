@@ -46,7 +46,7 @@ class BatchPermissions {
    */
   function __add(&$attr, $p_PermissionIdentityBodies) {
     // Check if correct
-    if ($p_PermissionIdentityBodies == NULL || empty($p_PermissionIdentityBodies)) {
+    if ($p_PermissionIdentityBodies === NULL || empty($p_PermissionIdentityBodies)) {
       return;
     }
 
