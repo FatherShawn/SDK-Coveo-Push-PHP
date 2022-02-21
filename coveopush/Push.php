@@ -733,7 +733,7 @@ class Push {
    */
   function GetStreamFileContainer() {
     $params = array();
-    $url = $this->GetStreamFileContainerUrl();
+    $url = $this->GetOpenStreamUrl();
     $result = $this->doPost($url, $this->GetRequestHeaders(), $params);
     if ($result !== FALSE) {
       $results = new StreamFileContainer($result);
