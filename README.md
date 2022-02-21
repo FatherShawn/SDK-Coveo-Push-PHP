@@ -25,11 +25,9 @@ pip install git+https://github.com/coveo-labs/SDK-Push-PHP
 Simply add the following lines into your project:
 
 ```php
-require_once('../coveopush/CoveoConstants.php');
-require_once('../coveopush/CoveoDocument.php');
-require_once('../coveopush/CoveoPermissions.php');
-require_once('../coveopush/CoveoPush.php');
-require_once('../coveopush/Enum.php');
+use Coveo\Search\SDK\SDKPushPHP\Push;
+use Coveo\Search\SDK\SDKPushPHP\PushType;
+use Coveo\Search\SDK\SDKPushPHP\Document;
 ```
 
 ## Prerequisites
@@ -46,6 +44,37 @@ The Coveo Push API supports two methods for pushing data: sending a single docum
 
 Unless you are only sending one document, you should **always** be sending your documents in batches.
 
+## Push vs Stream API
+For normal Push sources, use the default `Push` call.
+If you have a Catalog source (For Ecommerce): use the `Stream API` calls.
+How?
+When creating the `Push` class, use the following syntax:
+
+Full Catalog indexing:
+
+```PHP
+$pushtype = PushType::STREAM;
+$push = new Push($sourceId, $orgId, $apiKey, $endpoint, NULL, $pushtype);
+```
+
+Partial Catalog indexing:
+
+```PHP
+$pushtype = PushType::UPDATE_STREAM;
+$push = new Push($sourceId, $orgId, $apiKey, NULL, NULL, $pushtype);
+
+```
+
+## Using a different endpoint
+If there is the need to use a different endpoint. For example EU datacenter:
+
+```PHP
+$endpoint = "https://platform-eu.cloud.coveo.com";
+$pushtype = PushType::UPDATE_STREAM;
+$push = new Push($sourceId, $orgId, $apiKey, $endpoint, NULL, $pushtype);
+
+```
+
 ### Pushing a Single Document
 
 You should only use this method when you want to add or update a single document. Pushing several documents using this method may lead to the `429 - Too Many Requests` response from the Coveo platform.
@@ -53,14 +82,14 @@ You should only use this method when you want to add or update a single document
 Before pushing your document, you should specify the Source Id, Organization Id, and Api Key to use.
 
 ```php
-$push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+$push = new Push($sourceId, $orgId, $apiKey);
 ```
 
 You can then create a document with the appropriate options, as such:
 
 ```php
 // Create a document
-$mydoc = new Coveo\SDKPushPHP\Document("https://myreference.cov.com/&id=TESTME");
+$mydoc = new Document("https://myreference.cov.com/&id=TESTME");
 // Set plain text
 $mydoc->SetData("ALL OF THESE WORDS ARE SEARCHABLE");
 // Set FileExtension
@@ -77,7 +106,7 @@ $mydoc->Title = "THIS IS A TEST";
 // Set permissions
 $user_email = "wim@coveo.com";
 // Create a permission identity
-$myperm = new Coveo\SDKPushPHP\PermissionIdentity(Coveo\SDKPushPHP\PermissionIdentityType::User, "", $user_email);
+$myperm = new PermissionIdentity(PermissionIdentityType::User, "", $user_email);
 // Set the permissions on the document
 $allowAnonymous = True;
 $mydoc->SetAllowedAndDeniedPermissions(array($myperm), array(), $allowAnonymous);
@@ -94,22 +123,20 @@ $push->AddSingleDocument($mydoc);
 A full example would look like this:
 
 ```php
-require_once('../coveopush/CoveoConstants.php');
-require_once('../coveopush/CoveoDocument.php');
-require_once('../coveopush/CoveoPermissions.php');
-require_once('../coveopush/CoveoPush.php');
-require_once('../coveopush/Enum.php');
+use Coveo\Search\SDK\SDKPushPHP\Push;
+use Coveo\Search\SDK\SDKPushPHP\PushType;
+use Coveo\Search\SDK\SDKPushPHP\Document;
 
 //Reads the $sourceId, $orgId, and $apiKey
 require_once('config.php');
 
 // Setup the push client
-$push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+$push = new Push($sourceId, $orgId, $apiKey);
 // Get a first Ordering Id
 $startOrderingId = $push->CreateOrderingId();
 
 // Create a document
-$mydoc = new Coveo\SDKPushPHP\Document("https://myreference.cov.com/&id=TESTME");
+$mydoc = new Document("https://myreference.cov.com/&id=TESTME");
 // Set plain text
 $mydoc->SetData("ALL OF THESE WORDS ARE SEARCHABLE");
 // Set FileExtension
@@ -126,7 +153,7 @@ $mydoc->Title = "THIS IS A TEST";
 // Set permissions
 $user_email = "wim@coveo.com";
 // Create a permission identity
-$myperm = new Coveo\SDKPushPHP\PermissionIdentity(Coveo\SDKPushPHP\PermissionIdentityType::User, "", $user_email);
+$myperm = new PermissionIdentity(PermissionIdentityType::User, "", $user_email);
 // Set the permissions on the document
 $allowAnonymous = True;
 $mydoc->SetAllowedAndDeniedPermissions(array($myperm), array(), $allowAnonymous);
@@ -145,7 +172,7 @@ This SDK offers a convenient way to send batches of documents to the Coveo Cloud
 As with the previous call, you must first specify your Source Id, Organization Id, and API Key.
 
 ```php
-$push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+$push = new Push($sourceId, $orgId, $apiKey);
 ```
 
 You must then start the batch operation, as well as set the maximum size for each batch. If you do not set a maximum size for your request, it will default to 256 Mb. The size is set in bytes.
@@ -175,7 +202,7 @@ The following example demonstrates how to do that.
 
 ```php
 // Setup the push client
-$push = new Coveo\SDKPushPHP\Push($sourceId, $orgId, $apiKey);
+$push = new Push($sourceId, $orgId, $apiKey);
 // Start the batch
 $push->Start($updateSourceStatus, $deleteOlder);
 // Set the maximum
@@ -226,7 +253,7 @@ The folling example adds a simple permission set:
 // Set permissions
 $user_email = "wim@coveo.com";
 // Create a permission identity
-$myperm = new Coveo\SDKPushPHP\PermissionIdentity(Coveo\SDKPushPHP\PermissionIdentityType::User, "", $user_email);
+$myperm = new PermissionIdentity(PermissionIdentityType::User, "", $user_email);
 // Set the permissions on the document
 $allowAnonymous = True;
 $mydoc->SetAllowedAndDeniedPermissions(array($myperm), array(), $allowAnonymous);
@@ -247,34 +274,34 @@ $deniedusers = array("Alex","Anne");
 $groups = array("HR","RD","SALES");
 
 // Create the permission Levels. Each level can include multiple sets.
-$permLevel1 = new Coveo\SDKPushPHP\DocumentPermissionLevel('First');
-$permLevel1Set1 = new Coveo\SDKPushPHP\DocumentPermissionSet('1Set1');
-$permLevel1Set2 = new Coveo\SDKPushPHP\DocumentPermissionSet('1Set2');
+$permLevel1 = new DocumentPermissionLevel('First');
+$permLevel1Set1 = new DocumentPermissionSet('1Set1');
+$permLevel1Set2 = new DocumentPermissionSet('1Set2');
 $permLevel1Set1->AllowAnonymous = False;
 $permLevel1Set2->AllowAnonymous = False;
-$permLevel2 = new Coveo\SDKPushPHP\DocumentPermissionLevel('Second');
-$permLevel2Set = new Coveo\SDKPushPHP\DocumentPermissionSet('2Set1');
+$permLevel2 = new DocumentPermissionLevel('Second');
+$permLevel2Set = new DocumentPermissionSet('2Set1');
 $permLevel2Set->AllowAnonymous = False;
 
 // Set the allowed permissions for the first set of the first level
 foreach ($users as $user) {
     // Create the permission identity
     $permLevel1Set1->AddAllowedPermissions(
-    new Coveo\SDKPushPHP\PermissionIdentity($GUSER, $mysecprovidername, $user));
+    new PermissionIdentity($GUSER, $mysecprovidername, $user));
 }
 
 // Set the denied permissions for the second set of the first level
 foreach ($deniedusers as $user) {
   // Create the permission identity
   $permLevel1Set2->AddDeniedPermissions(
-  new Coveo\SDKPushPHP\PermissionIdentity($GUSER, $mysecprovidername, $user));
+  new PermissionIdentity($GUSER, $mysecprovidername, $user));
 }
 
 // Set the allowed permissions for the first set of the second level
 foreach ($groups as $group) {
   // Create the permission identity
   $permLevel2Set->AddAllowedPermissions(
-  new Coveo\SDKPushPHP\PermissionIdentity($GGROUP, $mysecprovidername, $group));
+  new PermissionIdentity($GGROUP, $mysecprovidername, $group));
 }
 
 // Set the permission sets to the appropriate level
@@ -311,12 +338,12 @@ foreach ($groups as $group) {
     foreach ($usersingroup as $user) {
         // Create a permission Identity
         array_push($members,
-          new Coveo\SDKPushPHP\PermissionIdentityExpansion($GUSER, $mysecprovidername, $user));
+          new PermissionIdentityExpansion($GUSER, $mysecprovidername, $user));
     }
     log2($GGROUP);
     log2($group);
     $push->AddExpansionMember(
-      new Coveo\SDKPushPHP\PermissionIdentityExpansion($GGROUP, $mysecprovidername, $group), $members, array(), array());
+      new PermissionIdentityExpansion($GGROUP, $mysecprovidername, $group), $members, array(), array());
 }
 ```
 
@@ -326,13 +353,13 @@ For each identity, you also need to map it to the email security provider:
 foreach ($users as $user) {
     // Create a permission Identity
     $mappings = array();
-    array_push($mappings,new Coveo\SDKPushPHP\PermissionIdentityExpansion($GUSER, "Email Security Provider", $user . "@coveo.com"));
+    array_push($mappings,new PermissionIdentityExpansion($GUSER, "Email Security Provider", $user . "@coveo.com"));
 
     $wellknowns = array();
-    array_push($wellknowns, new Coveo\SDKPushPHP\PermissionIdentityExpansion($GGROUP, $mysecprovidername, "Everyone"));
+    array_push($wellknowns, new PermissionIdentityExpansion($GGROUP, $mysecprovidername, "Everyone"));
 
     $push->AddExpansionMapping(
-      new Coveo\SDKPushPHP\PermissionIdentityExpansion($GUSER, $mysecprovidername, $user), array(), $mappings, $wellknowns);
+      new PermissionIdentityExpansion($GUSER, $mysecprovidername, $user), array(), $mappings, $wellknowns);
 }
 ```
 
@@ -352,6 +379,12 @@ Feb 2021:
 
 - First release
 
+Dec 2021:
+- Anca improved the code a lot!!
+
+Feb 2022:
+- Support of Stream API
+
 ### Dependencies
 
 ### References
@@ -361,3 +394,4 @@ Feb 2021:
 ### Authors
 
 - [Wim Nijmeijer](https://github.com/wnijmeijer)
+- [Anca Comanescu](https://github.com/AncaComanescu)

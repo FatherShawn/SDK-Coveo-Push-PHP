@@ -14,7 +14,6 @@
         }
     },
   "require": {
-    "coveo/sdkpushphp": "dev-master",
     "psr/log": "^1.1"
   }
 }
