@@ -45,7 +45,7 @@ $deleteOlder = True;
 // Setup the push client
 // Setup the push client
 // Use endpoint
-$endpoint = "https://platform.cloud.coveo.com";
+$endpoint = "https://api.cloud.coveo.com/push/v1";
 $pushtype = PushType::UPDATE_STREAM;
 
 $push = new Push($sourceId, $orgId, $apiKey, $endpoint, NULL, $pushtype);
