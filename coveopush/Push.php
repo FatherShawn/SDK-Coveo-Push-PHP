@@ -310,6 +310,7 @@ class Push {
     $values['org_id'] = $this->OrganizationId;
     $values['src_id'] = $this->SourceId;
     $values['prov_id'] = '';
+    $values['stream_id'] = '';
     return $values;
   }
 
