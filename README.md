@@ -69,7 +69,7 @@ $push = new Push($sourceId, $orgId, $apiKey, NULL, NULL, $pushtype);
 If there is the need to use a different endpoint. For example EU datacenter:
 
 ```PHP
-$endpoint = "https://platform-eu.cloud.coveo.com";
+$endpoint = "https://api-eu.cloud.coveo.com/push/v1";
 $pushtype = PushType::UPDATE_STREAM;
 $push = new Push($sourceId, $orgId, $apiKey, $endpoint, NULL, $pushtype);
 

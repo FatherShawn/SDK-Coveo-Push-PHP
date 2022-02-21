@@ -747,12 +747,15 @@ class Push {
    /**
    * Get the S3 Stream Chunk Container information.
    *
+   * @param string $p_StreamId
+   *   The streamId.
+
    * @return \Coveo\Search\SDK\SDKPushPHP\LargeFileContainer|null
    *   LargeFileContainer Class.
    */
-  function GetStreamChunkFileContainer() {
+  function GetStreamChunkFileContainer(string $p_StreamId) {
     $params = array();
-    $url = $this->GetChunkStreamUrl();
+    $url = $this->GetChunkStreamUrl($p_StreamId);
     $result = $this->doPost($url, $this->GetRequestHeaders(), $params);
     if ($result !== FALSE) {
       $results = new LargeFileContainer($result);
