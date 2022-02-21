@@ -22,14 +22,24 @@ class DocumentToDelete {
   public $Title = '';
 
   /**
+   * Document Title.
+   *
+   * @var bool
+   */
+  public $deleteChildren = FALSE;
+
+  /**
    * Constructor.
    *
    * @param string $p_DocumentId
    *   The document Id.
    */
-  function __construct(string $p_DocumentId) {
+  function __construct(string $p_DocumentId, bool $p_deleteChildren = NULL ) {
     $this->DocumentId = $p_DocumentId;
     $this->Title = $p_DocumentId;
+    $delete = $p_deleteChildren ?? FALSE;
+    $this->deleteChildren = $delete;
+
   }
 
   /**
@@ -39,6 +49,7 @@ class DocumentToDelete {
     // Check if empty
     $all = array();
     $all["DocumentId"] = $this->DocumentId;
+    $all["deleteChildren"] = $this->deleteChildren;
     return json_encode($all);
   }
 
