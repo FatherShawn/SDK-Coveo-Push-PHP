@@ -373,6 +373,23 @@ This way, you ensure that the remaining identities are properly sent to the Cove
 
 After the next Security Permission update cycle, the securities will be updated (see [Refresh a Security Identity Provider](https://docs.coveo.com/en/1905/cloud-v2-administrators/security-identities---page#refresh-a-security-identity-provider)).
 
+### Testing
+If you want to test, you could use XAMPP to start your local webserver.
+Create a new directory under:
+`\htdocs\`
+Inside your brand new directory install:
+`composer require coveo/sdkpushphp`
+This will install all the dependencies.
+Now use the files from the `examples` directory to start testing.
+You might need to start your file with:
+```PHP
+require_once __DIR__ . '/../vendor/autoload.php';
+use Coveo\Search\SDK\SDKPushPHP\Push;
+use Coveo\Search\SDK\SDKPushPHP\Document;
+
+require_once('config.php');
+
+```
 ### Changes
 
 Feb 2021:
