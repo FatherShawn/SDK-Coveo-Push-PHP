@@ -53,4 +53,33 @@ class DocumentToDelete {
     return json_encode($all);
   }
 
+    /**
+   * Validates if all properties on the Coveo Document are properly set.
+   *
+   * @return bool|Exception
+   */
+  function Validate() {
+    $result = TRUE;
+    $error = array();
+
+    return array($result, implode(' | ', $error));
+  }
+
+  
+  /**
+   * Puts all metadata and other fields into a clean JSON object.
+   *
+   * @return string|bool
+   *   A JSON encoded string on success or FALSE on failure.
+   */
+  function cleanUp() {
+    $source = $this->ToJson();
+    //echo json_encode($all);
+    //Debug($source);
+    $result = preg_replace('/,\s*"[^"]+":null|"[^"]+":null,?/', '', $source);
+    $result = preg_replace('/,\s*"[^"]+":\[\]|"[^"]+":\[\],?/', '', $source);
+    //Debug($result);
+    //return $result;
+    return json_decode($result);
+  }
 }

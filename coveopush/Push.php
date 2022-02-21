@@ -988,7 +988,7 @@ class Push {
     else {
       //Create a new document to delete
       $mydoc = new DocumentToDelete($p_DocumentId, $deleteChildren);
-      $this->Add($mydoc);
+      $result=$this->Add($mydoc);
     }
     if ($result !== FALSE) {
       return TRUE;
