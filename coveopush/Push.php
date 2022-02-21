@@ -3,6 +3,8 @@
 namespace Coveo\Search\SDK\SDKPushPHP;
 
 use Coveo\Search\SDK\SDKPushPHP\Constants;
+use Coveo\Search\SDK\SDKPushPHP\PushType;
+use Coveo\Search\SDK\SDKPushPHP\Stream;
 use Coveo\Search\SDK\SDKPushPHP\Document;
 use Coveo\Search\SDK\SDKPushPHP\DefaultLogger;
 use Exception;
@@ -106,7 +108,14 @@ class Push {
    *
    * @var string
    */
-  public $PushApiEndpoint = PushApiEndpoint::PROD_PUSH_API_URL;
+  public $Endpoint = PushApiEndpoint::PROD_PUSH_API_URL;
+
+  /**
+   * Push API type.
+   *
+   * @var string
+   */
+  public $PushType = PushType::PUSH;
 
   /**
    * Processing Delay In Minutes.
@@ -153,6 +162,13 @@ class Push {
   public $BatchPermissions;
 
   /**
+   * Current Stream.
+   *
+   * @var \coveo\Search\SDK\SDKPushPHP\Stream
+   */
+  public $CurrentStream;
+
+  /**
    * Max Request Size.
    *
    * @var int
@@ -175,18 +191,23 @@ class Push {
    *   Push Source Api Key.
    * @param [type] $p_Endpoint
    *   Push source endpoint URL.
+   * @param [pushType] $p_PushType
+   *   Push source endpoint URL.
    * @param \Psr\Log\LoggerInterface|NULL $logger
    *   Logger.
    */
-  function __construct(string $p_SourceId, string $p_OrganizationId, string $p_ApiKey, string $p_Endpoint = NULL, $logger = NULL) {
+  function __construct(string $p_SourceId, string $p_OrganizationId, string $p_ApiKey, string $p_Endpoint = NULL, $logger = NULL, $p_PushType = NULL) {
     set_time_limit(3000);
     $p_Endpoint = $p_Endpoint ?? PushApiEndpoint::PROD_PUSH_API_URL;
+    $p_PushType = $p_PushType ?? PushType::PUSH;
 
     $this->SourceId = $p_SourceId;
     $this->OrganizationId = $p_OrganizationId;
     $this->ApiKey = $p_ApiKey;
     $this->Endpoint = $p_Endpoint;
+    $this->PushType = $p_PushType;
     $this->MaxRequestSize = 255052544;
+    $this->CurrentStream = new Stream();
     $this->logger = $logger ?? new DefaultLogger();
     // validate Api Key
     $valid = preg_match('/^\w{10}-\w{4}-\w{4}-\w{4}-\w{12}$/', $p_ApiKey, $matches);
@@ -196,6 +217,7 @@ class Push {
     }
 
     $this->logger->info('Pushing to source ' . $p_SourceId);
+    $this->logger->info('Using Push Type   ' . $p_PushType);
   }
 
   /**
@@ -304,8 +326,8 @@ class Push {
    */
   protected function replacePath(string $path, array $values) {
     $newpath = $path;
-    $origin = array("{endpoint}", "{org_id}", "{src_id}", "{prov_id}");
-    $to   = array($values['endpoint'],$values['org_id'],$values['src_id'],$values['prov_id']);
+    $origin = array("{endpoint}", "{org_id}", "{src_id}", "{prov_id}", "{stream_id}");
+    $to   = array($values['endpoint'],$values['org_id'],$values['src_id'],$values['prov_id'], $values['stream_id']);
 
     $newpath = str_replace($origin, $to, $newpath);
     return $newpath;
@@ -346,6 +368,59 @@ class Push {
     return $url;
   }
 
+  /**
+   * Get the URL for the Open Stream call.
+   *
+   * @return string
+   *   Url for open stream.
+   */
+  function GetOpenStreamUrl() {
+    $values = $this->createPath();
+    $url = $this->replacePath(PushApiPaths::SOURCE_STREAM_OPEN, $values);
+    return $url;
+  }
+
+  /**
+   * Get the URL for the Close Stream call.
+   * @param string $p_StreamId
+   *   The streamId.
+   *
+   * @return string
+   *   Url for close stream.
+   */
+  function GetCloseStreamUrl(string $p_StreamId) {
+    $values = $this->createPath();
+    $values['stream_id'] = $p_StreamId;
+    $url = $this->replacePath(PushApiPaths::SOURCE_STREAM_CLOSE, $values);
+    return $url;
+  }
+
+  /**
+   * Get the URL for the Chunk Stream call.
+   * @param string $p_StreamId
+   *   The streamId.
+   *
+   * @return string
+   *   Url for chunk stream.
+   */
+  function GetChunkStreamUrl(string $p_StreamId) {
+    $values = $this->createPath();
+    $values['stream_id'] = $p_StreamId;
+    $url = $this->replacePath(PushApiPaths::SOURCE_STREAM_CHUNK, $values);
+    return $url;
+  }
+
+   /**
+   * Get the URL for the Update Stream call.
+   *
+   * @return string
+   *   Url for update stream.
+   */
+  function GetUpdateStreamUrl() {
+    $values = $this->createPath();
+    $url = $this->replacePath(PushApiPaths::SOURCE_STREAM_UPDATE, $values);
+    return $url;
+  }
   /**
    * Get the URL for the Update Document call.
    *
@@ -615,15 +690,19 @@ class Push {
    *   True if source srarus is updated. false if it failed to update.
    */
   function UpdateSourceStatus(string $p_SourceStatus) {
+    if ($this->PushType === PushType::PUSH) {
+      $params = array(Parameters::STATUS_TYPE => $p_SourceStatus);
 
-    $params = array(Parameters::STATUS_TYPE => $p_SourceStatus);
-
-    $result = $this->doPost($this->GetStatusUrl(), $this->GetRequestHeaders(), $params);
-    if ($result != FALSE) {
+      $result = $this->doPost($this->GetStatusUrl(), $this->GetRequestHeaders(), $params);
+      if ($result != FALSE) {
+        return TRUE;
+      }
+      else {
+        return FALSE;
+      }
+    } else {
+      //With Stream not allowed to update the source status
       return TRUE;
-    }
-    else {
-      return FALSE;
     }
   }
 
@@ -636,6 +715,44 @@ class Push {
   function GetLargeFileContainer() {
     $params = array();
     $url = $this->GetLargeFileContainerUrl();
+    $result = $this->doPost($url, $this->GetRequestHeaders(), $params);
+    if ($result !== FALSE) {
+      $results = new LargeFileContainer($result);
+      return $results;
+    }
+    else {
+      return NULL;
+    }
+  }
+
+   /**
+   * Get the S3 Stream Container information.
+   *
+   * @return \Coveo\Search\SDK\SDKPushPHP\StreamFileContainer|null
+   *   StreamFileContainer Class.
+   */
+  function GetStreamFileContainer() {
+    $params = array();
+    $url = $this->GetStreamFileContainerUrl();
+    $result = $this->doPost($url, $this->GetRequestHeaders(), $params);
+    if ($result !== FALSE) {
+      $results = new StreamFileContainer($result);
+      return $results;
+    }
+    else {
+      return NULL;
+    }
+  }
+
+   /**
+   * Get the S3 Stream Chunk Container information.
+   *
+   * @return \Coveo\Search\SDK\SDKPushPHP\LargeFileContainer|null
+   *   LargeFileContainer Class.
+   */
+  function GetStreamChunkFileContainer() {
+    $params = array();
+    $url = $this->GetChunkStreamUrl();
     $result = $this->doPost($url, $this->GetRequestHeaders(), $params);
     if ($result !== FALSE) {
       $results = new LargeFileContainer($result);
@@ -1003,6 +1120,27 @@ class Push {
   }
 
   /**
+   * Sends the documents to the Stream API, if previously uploaded to s3 the fileId is set.
+   *
+   * @param string $p_FileId
+   *   File Id retrieved from GetLargeFileContainer call.
+   *
+   * @return bool
+   *   Return TRUE or FALSE if request succeeded.
+   */
+  function AddUpdateStreamRequest(string $p_FileId) {
+    $params = array(Parameters::FILE_ID => $p_FileId);
+    // make PUT request to change status.
+    $result = $this->doPut($this->GetUpdateStreamUrl(), $this->GetRequestHeaders(), NULL, $params);
+    if ($result !== FALSE) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  /**
    * Uploads the batch to S3 and calls the Push API to record the fileId.
    *
    * @param array $p_ToAdd
@@ -1016,16 +1154,43 @@ class Push {
       $this->logger->error("UploadBatch: p_ToAdd and p_ToDelete are empty");
       return FALSE;
     }
-    $container = $this->GetLargeFileContainer();
-    if ($container === NULL) {
-      $this->logger->error("UploadBatch: S3 container is NULL");
-      return FALSE;
+    if ($this->PushType === PushType::PUSH ) {
+      $container = $this->GetLargeFileContainer();
+      if ($container === NULL) {
+        $this->logger->error("UploadBatch: S3 container is NULL");
+        return FALSE;
+      }
+      $result = TRUE;
+
+      $result = $this->UploadDocuments($container->UploadUri, $p_ToAdd, $p_ToDelete);
+
+      $result = $result && $this->AddUpdateDocumentsRequest($container->FileId);
     }
-    $result = TRUE;
+    if ($this->PushType === PushType::STREAM ) {
+      $result = TRUE;
 
-    $result = $this->UploadDocuments($container->UploadUri, $p_ToAdd, $p_ToDelete);
+      $result = $this->UploadDocuments($this->CurrentStream->UploadUri, $p_ToAdd, $p_ToDelete);
+      $container = $this->GetStreamChunkFileContainer($this->CurrentStream->StreamId);
+      if ($container === NULL) {
+        $this->logger->error("UploadBatch: S3 container is NULL");
+        return FALSE;
+      }
+      $this->CurrentStream->UploadUri = $container->UploadUri;
+      $this->CurrentStream->FileId = $container->FileId;
 
-    $result = $result && $this->AddUpdateDocumentsRequest($container->FileId);
+    }
+    if ($this->PushType === PushType::UPDATE_STREAM ) {
+      $container = $this->GetLargeFileContainer();
+      if ($container === NULL) {
+        $this->logger->error("UploadBatch: S3 container is NULL");
+        return FALSE;
+      }
+      $result = TRUE;
+
+      $result = $this->UploadDocuments($container->UploadUri, $p_ToAdd, $p_ToDelete);
+
+      $result = $result && $this->AddUpdateStreamRequest($container->FileId);
+    }
 
     return $result;
   }
@@ -1102,11 +1267,27 @@ class Push {
 
     $p_UpdateStatus = $p_UpdateStatus ?? TRUE;
     $is_source_updated = TRUE;
+    $is_stream_updated = TRUE;
     // Update Source Status
     if ($p_UpdateStatus) {
       $is_source_updated = $this->UpdateSourceStatus(SourceStatusType::Rebuild);
     }
 
+    // Check mode
+    if ($this->PushType === PushType::STREAM ) {
+      $this->CurrentStream = $this->GetStreamFileContainer();
+      if ($this->CurrentStream === NULL) {
+        $this->logger->error("AddDocuments: S3 container is NULL");
+        return FALSE;
+      }
+    }
+    if ($this->PushType === PushType::UPDATE_STREAM ) {
+      $this->CurrentStream = $this->GetLargeFileContainer();
+      if ($this->CurrentStream === NULL) {
+        $this->logger->error("AddDocuments: S3 container is NULL");
+        return FALSE;
+      }
+    }
     // Push the Documents
     if (!empty($p_CoveoDocumentsToAdd)) {
       $allDocuments = $p_CoveoDocumentsToAdd;
@@ -1119,9 +1300,14 @@ class Push {
     $batch_uploaded = $this->ProcessAndUploadBatch($allDocuments);
     $p_DeleteOlder = $p_DeleteOlder ?? FALSE;
 
+    // Close the stream
+    if ($this->PushType === PushType::STREAM ) {
+      $is_stream_updated = $this->doPost($this->GetCloseStreamUrl($this->CurrentStream->StreamId), $this->GetRequestHeaders(), NULL);
+    }
+
     $is_deleted = TRUE;
     // Delete Older Documents.
-    if ($p_DeleteOlder) {
+    if ($p_DeleteOlder && $this->PushType === PushType::PUSH) {
       // Batch Call
       // First check
       $startOrderingId = $this->CreateOrderingId();
@@ -1132,7 +1318,7 @@ class Push {
     if ($p_UpdateStatus) {
       $is_source_updated = $is_source_updated && $this->UpdateSourceStatus(SourceStatusType::Idle);
     }
-    return $is_source_updated && $batch_uploaded && $is_deleted;
+    return $is_source_updated && $batch_uploaded && $is_deleted && $is_stream_updated;
   }
 
   /**
@@ -1155,6 +1341,23 @@ class Push {
     if ($p_UpdateStatus) {
       $is_source_updated = $this->UpdateSourceStatus(SourceStatusType::Rebuild);
     }
+
+    // Check mode
+    if ($this->PushType === PushType::STREAM ) {
+      $this->CurrentStream = $this->GetStreamFileContainer();
+      if ($this->CurrentStream === NULL) {
+        $this->logger->error("AddDocuments: S3 container is NULL");
+        return FALSE;
+      }
+    }
+    if ($this->PushType === PushType::UPDATE_STREAM ) {
+      $this->CurrentStream = $this->GetLargeFileContainer();
+      if ($this->CurrentStream === NULL) {
+        $this->logger->error("AddDocuments: S3 container is NULL");
+        return FALSE;
+      }
+    }
+    
     return $is_ordering_id_valid && $is_source_updated;
   }
 
@@ -1212,6 +1415,46 @@ class Push {
   }
 
   /**
+   * Add a JSON to the batch call, if the buffer max is reached content is pushed.
+   *
+   * @param string $p_JSON
+   *
+   * @return bool
+   *   Return true/false if document nwas added to the batch or uploaded if current batch size exceeds max batch size.
+   */
+  function AddJson($p_Json) {
+    if ($p_Json == NULL) {
+      $this->logger->error("AddJson: p_Json is empty");
+      return FALSE;
+    }
+
+    $documentSize = strlen($p_Json) + 1;
+    $size_max_req = $this->GetSizeMaxRequest();
+    $this->totalSize += $documentSize;
+
+    if ($documentSize > $size_max_req) {
+      $this->logger->error("Document: " . $p_CoveoDocument->DocumentId . " can\'t be larger than " . $size_max_req . " bytes in size.");
+      return FALSE;
+    }
+    else {
+      $this->logger->debug("Document: " . $p_CoveoDocument->DocumentId . " Currentsize: " . $this->totalSize . " vs max: " . $size_max_req);
+    }
+
+    if ($this->totalSize > $size_max_req - (count($this->ToAdd) + count($this->ToDel))) {
+      $this->logger->debug("Uploading the batch because it exceeded the max size.");
+      // upload batch.
+      $this->UploadBatch($this->ToAdd, $this->ToDel);
+      // reset current document stacks and total size.
+      $this->ToAdd = array();
+      $this->ToDel = array();
+      $this->totalSize = $documentSize;
+    }
+    
+    array_push($this->ToAdd, json_decode($p_Json)); //->ToJson());
+    return TRUE;
+  }
+
+  /**
    * Ends the batch call (when started with Start()). Will push the final batch, update the status and delete older documents.
    *
    * @param bool|null $p_UpdateStatus
@@ -1225,7 +1468,13 @@ class Push {
     $is_batch_uploaded = $this->UploadBatch($this->ToAdd, $this->ToDel);
     $p_DeleteOlder = $p_DeleteOlder ?? FALSE;
     $is_deleted = TRUE;
-    if ($p_DeleteOlder) {
+    $is_stream_updated = TRUE;
+    // Close the stream
+    if ($this->PushType === PushType::STREAM ) {
+      $is_stream_updated = $this->doPost($this->GetCloseStreamUrl($this->CurrentStream->StreamId), $this->GetRequestHeaders(), NULL);
+    }
+
+    if ($p_DeleteOlder  && $this->PushType === PushType::PUSH) {
       // Delete Older Documents.
       $is_deleted = $this->DeleteOlderThan($this->StartOrderingId);
     }
@@ -1238,7 +1487,7 @@ class Push {
     if ($p_UpdateStatus) {
       $is_source_updated = $this->UpdateSourceStatus(SourceStatusType::Idle);
     }
-    return $is_batch_uploaded &&  $is_deleted && $is_source_updated;
+    return $is_batch_uploaded &&  $is_deleted && $is_source_updated && $is_stream_updated;
   }
 
   /**
