@@ -1305,7 +1305,8 @@ class Push {
 
     // Close the stream
     if ($this->PushType === PushType::STREAM ) {
-      $is_stream_updated = $this->doPost($this->GetCloseStreamUrl($this->CurrentStream->StreamId), $this->GetRequestHeaders(), NULL);
+      $params = array();
+      $is_stream_updated = $this->doPost($this->GetCloseStreamUrl($this->CurrentStream->StreamId), $this->GetRequestHeaders(), $params);
     }
 
     $is_deleted = TRUE;
@@ -1474,7 +1475,8 @@ class Push {
     $is_stream_updated = TRUE;
     // Close the stream
     if ($this->PushType === PushType::STREAM ) {
-      $is_stream_updated = $this->doPost($this->GetCloseStreamUrl($this->CurrentStream->StreamId), $this->GetRequestHeaders(), NULL);
+      $params = array();
+      $is_stream_updated = $this->doPost($this->GetCloseStreamUrl($this->CurrentStream->StreamId), $this->GetRequestHeaders(), $params);
     }
 
     if ($p_DeleteOlder  && $this->PushType === PushType::PUSH) {
