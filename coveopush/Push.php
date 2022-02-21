@@ -982,8 +982,14 @@ class Push {
     if ($deleteChildren === TRUE) {
       $params[Parameters::DELETE_CHILDREN] = "true";
     }
-
-    $result = $this->doDelete($this->GetDeleteDocumentUrl(), $this->GetRequestHeaders(), $params);
+    if ($this->PushType === PushType::PUSH ) {
+      $result = $this->doDelete($this->GetDeleteDocumentUrl(), $this->GetRequestHeaders(), $params);
+    }
+    else {
+      //Create a new document to delete
+      $mydoc = new DocumentToDelete($p_DocumentId, $deleteChildren);
+      $this->Add($mydoc);
+    }
     if ($result !== FALSE) {
       return TRUE;
     }
