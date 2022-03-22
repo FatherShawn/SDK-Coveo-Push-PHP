@@ -695,7 +695,7 @@ class Push {
       $params = array(Parameters::STATUS_TYPE => $p_SourceStatus);
 
       $result = $this->doPost($this->GetStatusUrl(), $this->GetRequestHeaders(), $params);
-      if ($result != FALSE) {
+      if ($result !== FALSE) {
         return TRUE;
       }
       else {
