@@ -35,12 +35,12 @@ class DefaultLogger implements LoggerInterface {
   /**
    * Log emergency type messages.
    *
-   * @param string $message
+   * @param string|\Stringable $message
    *   Message to log.
    * @param mixed[] $context
    *   Context.
    */
-  function emergency($message, array $context = array()) {
+  function emergency(string|\Stringable $message, array $context = array()): void {
     if (!self::$isEnabled) {
       return;
     }
@@ -52,12 +52,12 @@ class DefaultLogger implements LoggerInterface {
   /**
    * Log alert type messages.
    *
-   * @param string $message
+   * @param string|\Stringable $message
    *   Message to log.
    * @param mixed[] $context
    *   Context.
    */
-  function alert($message, array $context = array()) {
+  function alert(string|\Stringable $message, array $context = array()): void {
     if (!self::$isEnabled) {
       return;
     }
@@ -69,12 +69,12 @@ class DefaultLogger implements LoggerInterface {
    /**
    * Log critical type messages.
    *
-   * @param string $message
+   * @param string|\Stringable $message
    *   Message to log.
    * @param mixed[] $context
    *   Context.
    */
-  function critical($message, array $context = array()) {
+  function critical(string|\Stringable $message, array $context = array()): void {
     if (!self::$isEnabled) {
       return;
     }
@@ -86,12 +86,12 @@ class DefaultLogger implements LoggerInterface {
   /**
    * Log error type messages.
    *
-   * @param string $message
+   * @param string|\Stringable $message
    *   Message to log.
    * @param mixed[] $context
    *   Context.
    */
-  function error($message, array $context = array()) {
+  function error(string|\Stringable $message, array $context = array()): void {
     if (!self::$isEnabled) {
       return;
     }
@@ -103,12 +103,12 @@ class DefaultLogger implements LoggerInterface {
   /**
    * Log warning type messages.
    *
-   * @param string $message
+   * @param string|\Stringable $message
    *   Message to log.
    * @param mixed[] $context
    *   Context.
    */
-  function warning($message, array $context = array()) {
+  function warning(string|\Stringable $message, array $context = array()): void {
     if (!self::$isEnabled) {
       return;
     }
@@ -120,12 +120,12 @@ class DefaultLogger implements LoggerInterface {
   /**
    * Log notice type messages.
    *
-   * @param string $message
+   * @param string|\Stringable $message
    *   Message to log.
    * @param mixed[] $context
    *   Context.
    */
-  function notice($message, array $context = array()){
+  function notice(string|\Stringable $message, array $context = array()): void {
     if (!self::$isEnabled) {
       return;
     }
@@ -137,12 +137,12 @@ class DefaultLogger implements LoggerInterface {
   /**
    * Log info type messages.
    *
-   * @param string $message
+   * @param string|\Stringable $message
    *   Message to log.
    * @param mixed[] $context
    *   Context.
    */
-  function info($message, array $context = array()) {
+  function info(string|\Stringable $message, array $context = array()): void  {
     if (!self::$isEnabled) {
       return;
     }
@@ -154,12 +154,12 @@ class DefaultLogger implements LoggerInterface {
   /**
    * Log debug type messages.
    *
-   * @param string $message
+   * @param string|\Stringable $message
    *   Message to log.
    * @param mixed[] $context
    *   Context.
    */
-  function debug($message, array $context = array()) {
+  function debug(string|\Stringable $message, array $context = array()): void  {
     if (!self::$isEnabled) {
       return;
     }
@@ -171,14 +171,14 @@ class DefaultLogger implements LoggerInterface {
   /**
    * Log type messages.
    *
-   * @param Psr\Log\LogLevel $level
+   * @param \Psr\Log\LogLevel $level
    *   Level.
-   * @param string $message
+   * @param string|\Stringable $message
    *   Message to log.
    * @param mixed[] $context
    *   Context.
    */
-  function log($level, $message, array $context = array()) {
+  function log($level, string|\Stringable $message, array $context = array()): void {
     if (!self::$isEnabled) {
       return;
     }
